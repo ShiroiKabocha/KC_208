@@ -1,0 +1,99 @@
+﻿<main id="app" class="offline">
+<header>
+  <div class="title-row">
+    <h1>Kabocha 208 EICAS</h1>
+    <div id="tailNumber" class="tail-number">--------</div>
+  </div>
+  <div class="header-actions"><button id="powerButton" class="power-button" type="button" title="Hold for 1.2 seconds to shut down">PWR</button><div id="simStatus" class="sim-status offline" title="Simulator disconnected"><i class="sim-lamp"></i><span class="inop-tape">INOP</span></div></div>
+</header>
+<nav id="efbPortraitTabs" class="efb-portrait-tabs" aria-label="208 EICAS sections"><button type="button" data-efb-view="start" class="active">START</button><button type="button" data-efb-view="monitors">MONITORS</button><button type="button" data-efb-view="log">LOG</button></nav><div id="efbPortraitAdvisory" class="efb-portrait-advisory"></div>
+
+<div class="dashboard-body">
+<div class="rail-bank">
+<aside class="start-rail pre-start-rail">
+  <div class="rail-title">Pre-start checks</div>
+  <div class="start-list">
+    <div id="pre-covers" class="start-item pending" data-step="1"><div><div class="start-name">Engine covers</div><div id="pre-covers-value" class="start-value">---</div><div class="start-target">Remove before engine start</div></div><i class="state-lamp"></i></div>
+    <div id="pre-left" class="start-item pending" data-step="2"><div><div class="start-name">Left fuel</div><div id="pre-left-value" class="start-value">---</div><div class="start-target">Selector open / fuel available</div></div><i class="state-lamp"></i></div>
+    <div id="pre-right" class="start-item pending" data-step="3"><div><div class="start-name">Right fuel</div><div id="pre-right-value" class="start-value">---</div><div class="start-target">Selector open / fuel available</div></div><i class="state-lamp"></i></div>
+    <div id="pre-fuelcutoff" class="start-item pending" data-step="4"><div><div class="start-name">Fuel cutoff</div><div id="pre-fuelcutoff-value" class="start-value">---</div><div class="start-target">Fuel path open</div></div><i class="state-lamp"></i></div>
+    <div id="pre-firewall" class="start-item pending" data-step="5"><div><div class="start-name">Firewall valve</div><div id="pre-firewall-value" class="start-value">---</div><div class="start-target">Firewall path open</div></div><i class="state-lamp"></i></div>
+    <div id="pre-prop" class="start-item pending" data-step="6"><div><div class="start-name">Propeller lever</div><div id="pre-prop-value" class="start-value">---</div><div class="start-target">Full forward</div></div><i class="state-lamp"></i></div>
+    <div id="pre-power" class="start-item pending" data-step="7"><div><div class="start-name">Power lever</div><div id="pre-power-value" class="start-value">---</div><div class="start-target">Flight idle detent</div></div><i class="state-lamp"></i></div>
+    <div id="pre-inertial" class="start-item pending" data-step="8"><div><div class="start-name">Inertial separator</div><div id="pre-inertial-value" class="start-value">---</div><div class="start-target">Open for ground operation</div></div><i class="state-lamp"></i></div>
+  </div>
+  <div class="rail-legend"><span>Green - passed</span><span>Red - blocked</span></div>
+</aside>
+<div class="sequence-stack">
+<aside class="start-rail start-sequence-rail">
+  <div class="rail-title">Start setup</div>
+  <div class="start-list">
+    <div id="start-condition" class="start-item pending" data-step="1"><div><div class="start-name">Condition lever</div><div id="start-condition-value" class="start-value">---</div><div id="start-condition-target" class="start-target">Cutoff before boost pump</div></div><i class="state-lamp"></i></div>
+    <div id="start-battery" class="start-item pending" data-step="2"><div><div class="start-name">Battery</div><div class="start-value"><span id="start-battery-value">---</span><span id="start-voltage-value" class="inline-voltage">BUS --.- V</span></div><div id="start-battery-target" class="start-target">Master on / minimum 24 V</div></div><i class="state-lamp"></i></div>
+    <div id="start-pump" class="start-item pending" data-step="3"><div><div class="start-name">Boost pump</div><div id="start-pump-value" class="start-value">---</div><div id="start-pump-target" class="start-target">On for battery start</div></div><i class="state-lamp"></i></div>
+    <div id="start-starter" class="start-item pending" data-step="4"><div><div class="start-name">Starter</div><div id="start-starter-value" class="start-value">---</div><div id="start-starter-target" class="start-target">Waiting for live state</div></div><i class="state-lamp"></i></div>
+  </div>
+  <div class="rail-legend"><span>Green Â· ready</span><span>Amber Â· action</span></div>
+</aside>
+<aside class="start-rail active-sequence-rail">
+  <div class="rail-title">Start sequence<div class="rail-subtitle">Active start / final actions</div></div>
+  <div class="start-list">
+    <div id="seq-condition" class="start-item pending" data-step="1"><div><div class="start-name">Condition lever</div><div id="seq-condition-value" class="start-value">WAIT</div><div id="seq-condition-target" class="start-target">Low idle above 12% Ng</div></div><i class="state-lamp"></i></div>
+    <div id="seq-starter" class="start-item pending" data-step="2"><div><div class="start-name">Starter</div><div id="seq-starter-value" class="start-value">WAIT</div><div id="seq-starter-target" class="start-target">Off at 52% Ng</div></div><i class="state-lamp"></i></div>
+    <div id="seq-pump" class="start-item pending" data-step="3"><div><div class="start-name">Boost pump</div><div id="seq-pump-value" class="start-value">WAIT</div><div id="seq-pump-target" class="start-target">Normal after starter off</div></div><i class="state-lamp"></i></div>
+    <div id="seq-ready" class="start-item pending flight-ready-item" data-step="4"><div><div class="start-name">Aircraft status</div><div id="seq-ready-value" class="start-value">NOT READY</div><div id="seq-ready-target" class="start-target">Complete the start sequence</div></div><i class="state-lamp"></i></div>
+  </div>
+  <div class="rail-legend"><span>Amber - next action</span><span>Green - complete</span></div>
+</aside>
+</div>
+<div class="dimmer-panel">
+  <span class="dimmer-mark">DIM</span>
+  <div class="dimmer-wheel-slot"><div id="displayDimmer" class="dimmer-knob" role="slider" tabindex="0" aria-label="Display brightness" aria-valuemin="25" aria-valuemax="100" aria-valuenow="100" title="Drag, scroll, or use arrow keys"></div></div>
+  <span class="dimmer-mark">BRT</span>
+</div>
+</div>
+<div class="instrument-area">
+<div class="section-title advisory-title">Advisories</div>
+<section id="alertPanel" class="alert-panel clear">
+  <div id="alertTitle" class="alert-title">ENGINE PARAMETERS NORMAL</div>
+  <div id="alertList" class="alert-list"></div>
+</section>
+
+<div class="rack-section engine-rack">
+<div class="section-title">Monitors</div>
+<section class="engine-grid">
+ <div class="monitor-module">
+  <article id="card-itt" class="instrument"><div class="label">ITT</div><div class="readout"><span id="itt">---</span></div><div class="unit">deg C</div><div id="sub-itt" class="limit"></div><div class="scale"><div id="bar-itt"></div></div></article>
+  <article id="card-torque" class="instrument"><div class="label">Torque</div><div class="readout"><span id="torque">---</span></div><div class="unit">ft-lb</div><div id="sub-torque" class="limit"></div><div class="scale"><div id="bar-torque"></div></div></article>
+  <article id="card-ng" class="instrument"><div class="label">Gas generator</div><div class="readout"><span id="ng">---</span></div><div class="unit">percent Ng</div><div id="sub-ng" class="limit"></div><div class="scale"><div id="bar-ng"></div></div></article>
+  <article id="card-prop" class="instrument"><div class="label">Propeller</div><div class="readout"><span id="propRpm">---</span></div><div class="unit">RPM</div><div id="sub-prop" class="limit"></div><div class="scale"><div id="bar-prop"></div></div></article>
+ </div>
+ <div class="monitor-module">
+  <article id="card-oilp" class="instrument"><div class="label">Oil pressure</div><div class="readout"><span id="oilPressure">---</span></div><div class="unit">PSI</div><div id="sub-oilp" class="limit"></div><div class="scale"><div id="bar-oilp"></div></div></article>
+  <article id="card-oilt" class="instrument"><div class="label">Oil temperature</div><div class="readout"><span id="oilTemperature">---</span></div><div class="unit">deg C</div><div id="sub-oilt" class="limit"></div><div class="scale"><div id="bar-oilt"></div></div></article>
+  <article class="instrument"><div class="label">Fuel pressure</div><div class="readout"><span id="fuelPressure">---</span></div><div class="unit">PSI</div></article>
+  <article class="instrument"><div class="label">Fuel flow</div><div class="readout"><span id="fuelFlow">---</span></div><div class="unit">PPH</div><div id="sub-fuelflow" class="limit"></div></article>
+ </div>
+</section>
+</div>
+
+<div class="rack-section navigation-rack">
+<section class="aux-grid">
+  <article class="instrument"><div class="label">Magnetic heading</div><div class="readout"><span id="heading">---</span></div></article>
+  <article class="instrument"><div class="label">Heading bug</div><div class="readout heading-bug"><span id="headingBug">---</span></div></article>
+  <article class="instrument"><div class="label">Selected course</div><div class="readout selected-course"><span id="course">---</span></div></article>
+  <article class="instrument"><div class="label">Outside air</div><div class="readout"><span id="oat">---</span></div><div class="unit">deg C</div></article>
+  <article class="instrument"><div class="label">Fuel flow raw</div><div class="readout"><span id="fuelFlowRaw">---</span></div><div class="unit">approx GPH</div></article>
+</section>
+</div>
+</div>
+<div class="event-log-stack">
+<div class="event-log-controls"><button id="clearLastEvent" class="clr-last" type="button">CLR LAST</button></div>
+<aside class="event-log">
+  <div class="event-log-title">Critical Advisory Log</div>
+  <div class="log-screen"><div class="log-status"><span>SESSION</span><span id="logCount">00 EVENTS</span></div><div id="logEvents"><div class="log-empty">NO RECORDED LIMIT EVENTS</div></div></div>
+</aside>
+</div>
+</div>
+</main>
+<div id="firstRunNotice" class="first-run-notice" hidden><strong>THE DASHBOARD RUNS IN THE TRAY</strong>Closing this browser tab does not stop 208 EICAS. Use the upper-right PWR button, or right-click the 208 notification-area icon and choose Exit, to release port 8765.<button id="dismissFirstRun" type="button">GOT IT</button></div>

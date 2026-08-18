@@ -1,0 +1,16 @@
+_Cleanup-Quarantine-*/
+_Previous-Packages/
+208-EICAS-Atmospheric-Modules-Test-2/
+208-EICAS-Atmospheric-Modules-Test-2.zip
+208-EICAS-Flow/FullTest/
+208-EICAS-Flow/SafeTest/
+
+# Third-party reference material used during development is not redistributed.
+MSFS2024-Caravan-Engine-Monitor-v5.2.2/Caravan_Professional_Codex_Package/
+
+# Local build outputs and logs.
+**/bin/
+**/obj/
+*.user
+*.log
+BUILD-ERRORS.txt

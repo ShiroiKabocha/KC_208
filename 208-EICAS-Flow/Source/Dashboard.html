@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<title>208 EICAS</title>
+<style>
+:root{
+  color-scheme:dark;
+  --panel:#08090a;
+  --panel-edge:#353a3e;
+  --instrument:#171b20;
+  --instrument-edge:#343a40;
+  --recess:#171814;
+  --label:#ddd9c8;
+  --muted:#9d998c;
+  --green:#8fcf76;
+  --amber:#efb84e;
+  --red:#f05a4f;
+  --lcd:#ef542f;
+  --display-level:1;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  overflow-x:hidden;
+  background:#0e1011;
+  color:var(--label);
+  font-family:"Arial Narrow","Segoe UI",Arial,sans-serif;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.13;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px);
+}
+main{
+  width:calc(100vw - 12px);
+  margin:6px auto 8px;
+  padding:14px;
+  background-color:var(--panel);
+  background-image:linear-gradient(115deg,rgba(255,255,255,.018),transparent 27% 72%,rgba(0,0,0,.18)),repeating-linear-gradient(7deg,rgba(255,255,255,.008) 0 1px,transparent 1px 9px);
+  border:2px solid #070809;
+  box-shadow:inset 0 0 0 2px var(--panel-edge),inset 0 0 34px rgba(0,0,0,.55),0 8px 24px #000;
+}
+header{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:16px;
+  align-items:end;
+  padding:2px 4px 10px;
+  border-bottom:2px solid #151511;
+}
+h1{
+  position:relative;
+  display:inline-block;
+  flex:0 0 auto;
+  margin:0 8px 0 0;
+  color:#ddd9cb;
+  font-family:"Arial Narrow","Segoe UI",Arial,sans-serif;
+  font-size:17px;
+  font-style:normal;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:.095em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  transform:scaleY(1.14);
+  transform-origin:left center;
+  background:linear-gradient(180deg,#f1ede2 0%,#d8d3c5 38%,#aaa79d 62%,#d9d4c6 100%);
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 1px 0 #171815) drop-shadow(0 2px 1px rgba(0,0,0,.52));
+}
+.title-row{
+  display:flex;
+  align-items:center;
+  gap:26px;
+  flex-wrap:wrap;
+  min-width:0;
+}
+.tail-number{
+  flex:0 0 132px;
+  min-width:132px;
+  margin-left:2px;
+  padding:6px 9px 4px;
+  background:#061008;
+  border:2px inset #3d4439;
+  box-shadow:inset 0 0 9px #000;
+  color:#b9ef96;
+  font-family:Arial,sans-serif;
+  font-size:20px;
+  font-weight:normal;
+  line-height:1;
+  letter-spacing:0;
+  text-align:center;
+  text-shadow:none;
+  clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px);
+}
+.sim-status{position:relative;display:grid;place-items:center;width:42px;height:34px}
+.header-actions{display:flex;align-items:center;gap:9px}.power-button{position:relative;width:43px;height:27px;padding:0;border:1px solid #030404;border-radius:2px;background:linear-gradient(180deg,#4b4e50,#292c2e 42%,#17191b 55%,#25282a);box-shadow:0 0 0 1px #55595a,inset 0 1px rgba(255,255,255,.13),inset 0 -2px 3px #080909,2px 3px 4px #000;color:#e1ddcc;font:700 9px "Arial Narrow","Segoe UI",sans-serif;letter-spacing:.13em;text-shadow:1px 1px #000;cursor:pointer;overflow:hidden}.power-button:before{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.07);pointer-events:none}.power-button:after{content:"";position:absolute;left:0;bottom:0;width:0;height:2px;background:#9bd67d;box-shadow:0 0 4px #83c76b}.power-button.holding:after{width:100%;transition:width 1.2s linear}.power-button:active{transform:translate(1px,1px)}
+.sim-lamp{width:13px;height:13px;border-radius:50%;background:#83c76b;border:1px solid #080a07;box-shadow:inset 0 0 2px #dcffcb,0 0 6px rgba(125,220,90,.72),0 0 0 2px #3e413a}
+.inop-tape{display:none;position:absolute;left:-7px;top:7px;z-index:2;padding:2px 8px 1px;background:#c5b998;color:#28261f;font:700 10px "Arial Narrow",Arial,sans-serif;letter-spacing:.12em;transform:rotate(-7deg);box-shadow:0 1px 2px #000}
+.sim-status.offline .sim-lamp{background:#22251f;box-shadow:inset 0 0 4px #000,0 0 0 2px #3e413a}
+.sim-status.offline .inop-tape{display:block}
+.seg-display{display:flex;justify-content:center;align-items:center;width:100%;height:1em;gap:.035em;color:currentColor}
+.seg-char{display:block;width:.61em;height:1em;overflow:visible}
+.seg-char line{stroke:currentColor;stroke-width:4.4;stroke-linecap:round;fill:none;opacity:.045}
+.seg-char .on{opacity:1;filter:drop-shadow(0 0 1.2px currentColor)}
+.readout.heading-bug{
+  color:#d89a5a;
+  text-shadow:0 0 6px rgba(216,154,90,.15);
+}
+.readout.selected-course{
+  color:#d9c66a;
+  text-shadow:0 0 6px rgba(217,198,106,.15);
+}
+.alert-panel{
+  margin:14px 0;
+  min-height:61px;
+  background:#11120f;
+  border:2px inset #4b4941;
+  padding:10px 13px;
+  font-family:Consolas,"Courier New",monospace;
+}
+.alert-title{
+  color:var(--green);
+  font-size:15px;
+  font-weight:bold;
+  letter-spacing:.08em;
+}
+.alert-panel.warning .alert-title{color:var(--amber)}
+.alert-panel.critical .alert-title{color:var(--red)}
+.alert-list{margin-top:5px;display:grid;gap:3px}
+.alert{font-size:13px;color:#ddd8c7}
+.alert strong{color:inherit;margin-right:10px}
+.dashboard-body{display:grid;grid-template-columns:422px minmax(0,1fr) 250px;gap:10px;align-items:start}
+.rail-bank{display:grid;grid-template-columns:repeat(2,205px);gap:12px;align-items:start}
+.sequence-stack{display:grid;gap:10px}
+.sequence-stack .start-rail+ .start-rail{margin-top:0}
+.dimmer-panel{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:56px;padding:2px 8px}
+.dimmer-mark{color:#aaa697;font-size:9px;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;text-shadow:1px 1px #000}
+.dimmer-wheel-slot{display:contents}
+.dimmer-knob{position:relative;width:48px;height:48px;border-radius:50%;outline:none;cursor:grab;background:radial-gradient(circle,#2e3235 0 47%,transparent 49%),repeating-conic-gradient(#575b5d 0deg 5deg,#17191b 5deg 10deg);border:2px solid #08090a;box-shadow:0 0 0 1px #55595a,inset -5px -5px 8px #050606,inset 4px 4px 6px rgba(255,255,255,.08),0 5px 8px #000;transform:rotate(135deg);touch-action:none}
+.dimmer-knob:before{content:"";position:absolute;left:21px;top:2px;width:3px;height:12px;border-radius:2px;background:#d2cdb8;box-shadow:0 0 2px #fff,1px 1px #000}.dimmer-knob:active{cursor:grabbing}.dimmer-knob:focus-visible{box-shadow:0 0 0 2px #93cc78,inset -5px -5px 8px #050606,inset 4px 4px 6px rgba(255,255,255,.08),0 5px 8px #000}
+.readout,.scale>div,.tail-number,.log-screen,.alert-title,.start-value,.inline-voltage{filter:brightness(var(--display-level))}
+.instrument-area{min-width:0}
+.rack-section{position:relative;margin-top:14px;padding:9px 9px 10px;background:#0c0f12;border:2px solid #050607;box-shadow:inset 0 0 0 1px #3b4248,inset 0 0 22px rgba(0,0,0,.8),1px 1px 0 #4d5255}
+.rack-section:before,.rack-section:after{content:"";position:absolute;top:7px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#777a79 0 11%,#292c2e 30% 62%,#070808 68%);box-shadow:0 0 0 1px #020303}
+.rack-section:before{left:7px}.rack-section:after{right:7px}
+.rack-section .section-title{margin:0 15px 9px;padding:1px 0 7px;border-bottom:1px solid #343a3f;text-align:center;color:#c4c2b8}
+.navigation-rack{padding-top:20px}
+.event-log-stack{min-width:0;margin-top:7px}.event-log-controls{height:31px;padding-left:3px}
+.clr-last{position:relative;min-width:69px;height:27px;padding:0 9px;border:1px solid #030404;border-radius:2px;background:linear-gradient(180deg,#4b4e50 0,#292c2e 42%,#17191b 55%,#25282a 100%);box-shadow:0 0 0 1px #55595a,inset 0 1px rgba(255,255,255,.13),inset 0 -2px 3px #080909,2px 3px 4px #000;color:#e1ddcc;font:700 9px "Arial Narrow","Segoe UI",sans-serif;letter-spacing:.12em;text-shadow:1px 1px #000;cursor:pointer}
+.clr-last:before{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.07);border-radius:1px;pointer-events:none}.clr-last:hover{color:#f3efdc;background:linear-gradient(180deg,#565a5c,#303437 42%,#1b1e20 55%,#2a2e30)}.clr-last:active{transform:translate(1px,2px);box-shadow:0 0 0 1px #414546,inset 1px 2px 5px #050606}.clr-last:focus-visible{outline:1px solid #9bc783;outline-offset:2px}
+.event-log{min-width:0;margin-top:0;padding:10px;background:#0b0e10;border:2px solid #050607;box-shadow:inset 0 0 0 1px #3b4248,inset 0 0 22px #000,1px 1px 0 #4d5255}
+.event-log-title{padding:2px 12px 9px;border-bottom:1px solid #343a3f;color:#d2cdbd;text-align:center;font-size:12px;font-weight:bold;letter-spacing:.15em;text-transform:uppercase;text-shadow:1px 1px #000}
+.event-log-sub{margin-top:4px;color:#6f756e;font:9px Consolas,monospace;letter-spacing:.08em}
+.log-screen{min-height:650px;margin-top:7px;padding:9px 8px;background-color:#030805;background-image:linear-gradient(180deg,rgba(120,180,105,.035),transparent 28%),repeating-linear-gradient(0deg,transparent 0 3px,rgba(130,190,115,.025) 3px 4px);border:2px inset #303a31;box-shadow:inset 0 0 18px #000;color:#9bc783;font:11px "Lucida Console",Consolas,monospace;text-shadow:0 0 4px rgba(115,215,95,.32)}
+.log-status{display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #263a28;color:#7fae6c;font-size:9px;letter-spacing:.05em}
+.log-event{margin-top:10px;padding:8px 7px 7px;border-left:2px solid #a97425;background:rgba(105,72,24,.075)}
+.log-event.critical{border-left-color:#d7442e;background:rgba(135,38,25,.09)}
+.log-time{display:flex;justify-content:space-between;color:#667a62;font-size:9px}.log-severity{color:#e8ab3e}.critical .log-severity{color:#f05a40}
+.log-name{margin-top:5px;color:#e0a43d;font-size:12px;font-weight:bold;line-height:1.15;letter-spacing:.035em}.critical .log-name{color:#ef563e}
+.log-detail{margin-top:4px;color:#9ab38e;font-size:9px;line-height:1.4;white-space:pre-line}.log-cleared{margin-top:5px;color:#66805e;font-size:8px;text-align:right}
+.log-empty{padding:18px 4px;color:#52634e;font-size:9px;line-height:1.5;text-align:center}
+.start-rail{margin-top:14px;padding:10px 9px 11px;background:#111419;border:2px solid #08090a;box-shadow:inset 0 0 0 1px #3b3d3e,inset 0 0 20px #000,1px 1px 0 #5a584f}
+.rail-title{padding:3px 4px 9px;border-bottom:1px solid #4a4943;color:#e1dcc8;text-align:center;font-size:12px;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;text-shadow:1px 1px #000}
+.rail-subtitle{margin-top:4px;color:#77766e;font-size:9px;letter-spacing:.1em}
+.start-list{display:grid;gap:5px;margin-top:8px}
+.start-item{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr) 15px;gap:6px;align-items:center;min-height:49px;padding:6px 6px 6px 5px;background:#191d21;border:1px solid #060708;box-shadow:inset 0 0 0 1px #31363a}
+.start-item:before{content:attr(data-step);display:grid;place-items:center;width:20px;height:20px;border:1px solid #4b4a44;border-radius:50%;color:#8d897c;font:10px Consolas,monospace}
+.start-name{color:#d8d3c1;font-size:10px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;text-shadow:1px 1px #000}
+.start-value{margin-top:2px;color:#ee5b35;font:14px "Lucida Console",Consolas,monospace;letter-spacing:.04em;text-shadow:0 0 4px rgba(255,60,25,.55)}
+.inline-voltage{display:inline-block;margin-left:6px;color:#91cb78;font-size:10px;letter-spacing:.04em;text-shadow:0 0 3px rgba(125,220,90,.4)}
+.start-target{margin-top:2px;color:#77766e;font-size:9px;line-height:1.15;text-transform:uppercase}
+.pre-start-rail .start-target{display:none}
+.state-lamp{width:10px;height:10px;border-radius:50%;background:#273323;border:1px solid #050605;box-shadow:inset 0 0 3px #000,0 0 0 1px #383a35}
+.ready .state-lamp{background:#83c76b;box-shadow:inset 0 0 2px #d8ffc5,0 0 5px rgba(125,220,90,.65)}
+.ready .start-value{color:#9fea7f;text-shadow:0 0 5px rgba(125,220,90,.55)}
+.pending .state-lamp{background:#54401d;box-shadow:inset 0 0 3px #000,0 0 0 1px #4a4436}
+.pending{border-color:#57451e}.pending .start-value{color:#e3a840;text-shadow:0 0 4px rgba(227,168,64,.45)}
+.action-ready{border-color:#5d8e4e}
+.action-ready .start-value{color:#9fea7f;text-shadow:0 0 7px rgba(125,255,90,.85);animation:instruction-flash .8s steps(1,end) infinite}
+.action-ready .state-lamp{background:#83c76b;box-shadow:inset 0 0 2px #d8ffc5,0 0 7px rgba(125,220,90,.8);animation:instruction-flash .8s steps(1,end) infinite}
+.time-warning{border-color:#a26f20}.time-warning .start-value{color:#ffc04c;text-shadow:0 0 7px rgba(255,180,45,.8);animation:instruction-flash .8s steps(1,end) infinite}.time-warning .state-lamp{background:#e4a32e;box-shadow:0 0 7px rgba(255,180,45,.8);animation:instruction-flash .8s steps(1,end) infinite}
+.abort-action{border-color:#9d2f22}.abort-action .start-value{color:#ff4a30;text-shadow:0 0 8px rgba(255,55,30,.9);animation:instruction-flash .55s steps(1,end) infinite}.abort-action .state-lamp{background:#ff3b22;box-shadow:0 0 8px rgba(255,45,25,.9);animation:instruction-flash .55s steps(1,end) infinite}
+@keyframes instruction-flash{50%{opacity:.3}}
+.blocked .state-lamp{background:#ff3b22;animation:limit-flash .82s steps(1,end) infinite}
+.blocked{border-color:#6a281f}.blocked .start-value{color:#ef542f}
+.rail-legend{display:none}
+.section-title{
+  margin:15px 3px 7px;
+  font-size:12px;
+  font-weight:bold;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#bab5a4;
+}
+.advisory-title{margin:11px 3px -8px}
+.engine-grid{
+  display:grid;
+  gap:9px;
+}
+.monitor-module{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:5px;background:#11151a;border:2px solid #050607;box-shadow:inset 0 0 0 1px #454b50,inset 0 0 20px rgba(0,0,0,.8),1px 1px 0 #595d60}
+.monitor-module:before,.monitor-module:after{content:"";position:absolute;z-index:2;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#777a79 0 11%,#292c2e 30% 62%,#070808 68%);box-shadow:0 0 0 1px #020303}
+.monitor-module:before{left:7px;top:7px}.monitor-module:after{right:7px;bottom:7px}
+.monitor-module .instrument{border:0;background:transparent;box-shadow:none}
+.monitor-module .instrument:before,.monitor-module .instrument:after{display:none}
+.aux-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+}
+.instrument{
+  position:relative;
+  min-width:0;
+  min-height:154px;
+  padding:13px 13px 11px;
+  background-color:var(--instrument);
+  background-image:
+    linear-gradient(102deg,transparent 0 44%,rgba(255,255,255,.018) 45%,transparent 47%),
+    repeating-linear-gradient(8deg,rgba(255,255,255,.012) 0 1px,transparent 1px 7px);
+  border:2px solid #080a0c;
+  box-shadow:
+    inset 0 0 0 1px var(--instrument-edge),
+    inset 0 0 16px rgba(0,0,0,.72),
+    1px 1px 0 #5b5a53;
+}
+.instrument:nth-child(3n+1){border-top-color:#292e33}
+.instrument:nth-child(4n+2){border-right-color:#33373a}
+.instrument:before,.instrument:after{
+  content:"";
+  position:absolute;
+  width:7px;height:7px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#77766f 0 12%,#26282a 28% 63%,#080909 68%);
+  box-shadow:0 0 0 1px #050606;
+}
+.instrument:before{left:6px;top:6px}
+.instrument:after{right:6px;bottom:6px}
+.label{
+  text-align:center;
+  font-size:12px;
+  font-weight:bold;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--label);
+  text-shadow:1px 1px 0 #000;
+  opacity:.91;
+}
+.label:after{
+  content:"";
+  position:absolute;
+  top:8px;
+  right:9px;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#351c19;
+  border:1px solid #090909;
+  box-shadow:inset 0 0 3px #000,0 0 0 1px #33302c;
+}
+.instrument.warn .label:after,.instrument.crit .label:after{
+  background:#ff3b22;
+  animation:limit-flash .82s steps(1,end) infinite;
+}
+.instrument.warn .label:after{animation-duration:1.15s}
+@keyframes limit-flash{
+  0%,44%{background:#ff3b22;box-shadow:inset 0 0 2px #ffb09e,0 0 5px #ff321b,0 0 11px rgba(255,35,15,.7)}
+  45%,100%{background:#401714;box-shadow:inset 0 0 3px #000,0 0 0 1px #33302c}
+}
+.readout{
+  margin:14px 4px 7px;
+  position:relative;
+  padding:7px 9px 4px;
+  background-color:#030303;
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.025),transparent 35%),
+    repeating-linear-gradient(90deg,transparent 0 3px,rgba(255,255,255,.009) 3px 4px);
+  border:2px inset #303237;
+  color:var(--lcd);
+  text-align:right;
+  font-family:"Lucida Console",Consolas,"Courier New",monospace;
+  font-size:clamp(35px,4.5vw,62px);
+  font-weight:normal;
+  line-height:1;
+  letter-spacing:.075em;
+  text-shadow:0 0 4px rgba(255,56,20,.8),0 0 10px rgba(255,56,20,.28);
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px);
+}
+.unit{
+  text-align:right;
+  font-size:12px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  font-weight:bold;
+  color:#c7c2ae;
+  text-shadow:1px 1px #000;
+  opacity:.84;
+}
+.limit{
+  min-height:28px;
+  margin-top:9px;
+  text-align:center;
+  color:#969184;
+  font-size:15px;
+  line-height:1.3;
+  text-transform:uppercase;
+  text-shadow:1px 1px #000;
+}
+.scale{
+  position:relative;
+  height:9px;
+  margin-top:7px;
+  overflow:hidden;
+  background:repeating-linear-gradient(90deg,#202820 0 calc(6.25% - 2px),#070908 calc(6.25% - 2px) 6.25%);
+  border:1px inset #30342f;
+  box-shadow:inset 0 0 4px #000;
+}
+.scale>div{width:100%;height:100%;clip-path:inset(0 calc(100% - var(--fill,0%)) 0 0);background:repeating-linear-gradient(90deg,transparent 0 calc(6.25% - 2px),#070908 calc(6.25% - 2px) 6.25%),linear-gradient(90deg,#65d35f 0 calc(var(--green-end,80%) - 1.2%),#9dc451 var(--green-end,80%),#dda940 calc(var(--green-end,80%) + 1.2%) calc(var(--amber-end,90%) - 1.2%),#d77b37 var(--amber-end,90%),#ed4e38 calc(var(--amber-end,90%) + 1.2%) 100%);background-size:100% 100%;filter:brightness(var(--display-level)) saturate(.9);box-shadow:0 0 3px rgba(102,220,92,.34)}
+.instrument.warn{box-shadow:none}
+.instrument.crit{box-shadow:none}
+.instrument.warn .readout{color:var(--amber);text-shadow:none}
+.instrument.crit .readout{color:var(--red);text-shadow:none}
+.monitor-module:nth-child(2) .instrument{min-height:126px;padding-top:10px;padding-bottom:8px}
+.monitor-module:nth-child(2) .instrument .readout{margin-top:9px;margin-bottom:4px;padding-top:5px;font-size:clamp(30px,3.8vw,50px)}
+.monitor-module:nth-child(2) .instrument .limit{min-height:23px;margin-top:5px;font-size:13px;line-height:1.15}
+.monitor-module:nth-child(2) .instrument .scale{margin-top:4px}
+.aux-grid .instrument{min-height:98px;padding-top:10px;padding-bottom:7px}
+.aux-grid .readout{font-size:clamp(25px,3vw,40px);margin-top:8px;margin-bottom:3px;padding-top:5px}
+.aux-grid .unit{font-size:10px}
+.offline .readout{opacity:.32}
+.first-run-notice{position:fixed;right:18px;bottom:18px;z-index:20;width:min(360px,calc(100vw - 36px));padding:14px 15px;background:#111419;border:2px solid #050607;box-shadow:inset 0 0 0 1px #4a4e50,0 8px 22px #000;color:#d7d2c0;font-size:12px;line-height:1.45}.first-run-notice strong{display:block;margin-bottom:5px;color:#9bc783;letter-spacing:.1em}.first-run-notice button{float:right;margin-top:9px;padding:4px 10px;background:#292d30;border:1px solid #666;color:#e4dfce;font:bold 9px Arial,sans-serif;letter-spacing:.1em;cursor:pointer}
+@media(max-width:1200px){
+  .dashboard-body{grid-template-columns:1fr}
+  .rail-bank{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .event-log-stack{margin-top:2px}.log-screen{min-height:260px}
+  .start-rail{margin-bottom:2px}
+  .aux-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  main{width:100%;margin:0;padding:10px}
+  header{grid-template-columns:1fr}
+  .rail-bank{grid-template-columns:1fr}
+  .monitor-module{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .monitor-module .instrument:nth-child(-n+2){border-bottom:1px solid #363c41}
+  .aux-grid{grid-template-columns:1fr}
+}
+</style>
+  <script src="SimDataAdapter.js?v=11"></script>
+  <link rel="stylesheet" href="PortraitMode.css?v=11">
+</head>
+<body>
+<main id="app" class="offline">
+<header>
+  <div class="title-row">
+    <h1>Kabocha 208 EICAS</h1>
+    <div id="tailNumber" class="tail-number">--------</div>
+  </div>
+  <div class="header-actions"><button id="powerButton" class="power-button" type="button" title="Hold for 1.2 seconds to shut down">PWR</button><div id="simStatus" class="sim-status offline" title="Simulator disconnected"><i class="sim-lamp"></i><span class="inop-tape">INOP</span></div></div>
+</header>
+<nav id="efbPortraitTabs" class="efb-portrait-tabs" aria-label="208 EICAS sections"><button type="button" data-efb-view="start" class="active">START</button><button type="button" data-efb-view="monitors">MONITORS</button><button type="button" data-efb-view="log">LOG</button></nav><div id="efbPortraitAdvisory" class="efb-portrait-advisory"></div>
+
+<div class="dashboard-body">
+<div class="rail-bank">
+<aside class="start-rail pre-start-rail">
+  <div class="rail-title">Pre-start checks</div>
+  <div class="start-list">
+    <div id="pre-covers" class="start-item pending" data-step="1"><div><div class="start-name">Engine covers</div><div id="pre-covers-value" class="start-value">---</div><div class="start-target">Remove before engine start</div></div><i class="state-lamp"></i></div>
+    <div id="pre-left" class="start-item pending" data-step="2"><div><div class="start-name">Left fuel</div><div id="pre-left-value" class="start-value">---</div><div class="start-target">Selector open / fuel available</div></div><i class="state-lamp"></i></div>
+    <div id="pre-right" class="start-item pending" data-step="3"><div><div class="start-name">Right fuel</div><div id="pre-right-value" class="start-value">---</div><div class="start-target">Selector open / fuel available</div></div><i class="state-lamp"></i></div>
+    <div id="pre-fuelcutoff" class="start-item pending" data-step="4"><div><div class="start-name">Fuel cutoff</div><div id="pre-fuelcutoff-value" class="start-value">---</div><div class="start-target">Fuel path open</div></div><i class="state-lamp"></i></div>
+    <div id="pre-firewall" class="start-item pending" data-step="5"><div><div class="start-name">Firewall valve</div><div id="pre-firewall-value" class="start-value">---</div><div class="start-target">Firewall path open</div></div><i class="state-lamp"></i></div>
+    <div id="pre-prop" class="start-item pending" data-step="6"><div><div class="start-name">Propeller lever</div><div id="pre-prop-value" class="start-value">---</div><div class="start-target">Full forward</div></div><i class="state-lamp"></i></div>
+    <div id="pre-power" class="start-item pending" data-step="7"><div><div class="start-name">Power lever</div><div id="pre-power-value" class="start-value">---</div><div class="start-target">Flight idle detent</div></div><i class="state-lamp"></i></div>
+    <div id="pre-inertial" class="start-item pending" data-step="8"><div><div class="start-name">Inertial separator</div><div id="pre-inertial-value" class="start-value">---</div><div class="start-target">Open for ground operation</div></div><i class="state-lamp"></i></div>
+  </div>
+  <div class="rail-legend"><span>Green - passed</span><span>Red - blocked</span></div>
+</aside>
+<div class="sequence-stack">
+<aside class="start-rail start-sequence-rail">
+  <div class="rail-title">Start setup</div>
+  <div class="start-list">
+    <div id="start-condition" class="start-item pending" data-step="1"><div><div class="start-name">Condition lever</div><div id="start-condition-value" class="start-value">---</div><div id="start-condition-target" class="start-target">Cutoff before boost pump</div></div><i class="state-lamp"></i></div>
+    <div id="start-battery" class="start-item pending" data-step="2"><div><div class="start-name">Battery</div><div class="start-value"><span id="start-battery-value">---</span><span id="start-voltage-value" class="inline-voltage">BUS --.- V</span></div><div id="start-battery-target" class="start-target">Master on / minimum 24 V</div></div><i class="state-lamp"></i></div>
+    <div id="start-pump" class="start-item pending" data-step="3"><div><div class="start-name">Boost pump</div><div id="start-pump-value" class="start-value">---</div><div id="start-pump-target" class="start-target">On for battery start</div></div><i class="state-lamp"></i></div>
+    <div id="start-starter" class="start-item pending" data-step="4"><div><div class="start-name">Starter</div><div id="start-starter-value" class="start-value">---</div><div id="start-starter-target" class="start-target">Waiting for live state</div></div><i class="state-lamp"></i></div>
+  </div>
+  <div class="rail-legend"><span>Green · ready</span><span>Amber · action</span></div>
+</aside>
+<aside class="start-rail active-sequence-rail">
+  <div class="rail-title">Start sequence<div class="rail-subtitle">Active start / final actions</div></div>
+  <div class="start-list">
+    <div id="seq-condition" class="start-item pending" data-step="1"><div><div class="start-name">Condition lever</div><div id="seq-condition-value" class="start-value">WAIT</div><div id="seq-condition-target" class="start-target">Low idle above 12% Ng</div></div><i class="state-lamp"></i></div>
+    <div id="seq-starter" class="start-item pending" data-step="2"><div><div class="start-name">Starter</div><div id="seq-starter-value" class="start-value">WAIT</div><div id="seq-starter-target" class="start-target">Off at 52% Ng</div></div><i class="state-lamp"></i></div>
+    <div id="seq-pump" class="start-item pending" data-step="3"><div><div class="start-name">Boost pump</div><div id="seq-pump-value" class="start-value">WAIT</div><div id="seq-pump-target" class="start-target">Normal after starter off</div></div><i class="state-lamp"></i></div>
+    <div id="seq-ready" class="start-item pending flight-ready-item" data-step="4"><div><div class="start-name">Aircraft status</div><div id="seq-ready-value" class="start-value">NOT READY</div><div id="seq-ready-target" class="start-target">Complete the start sequence</div></div><i class="state-lamp"></i></div>
+  </div>
+  <div class="rail-legend"><span>Amber - next action</span><span>Green - complete</span></div>
+</aside>
+</div>
+<div class="dimmer-panel">
+  <span class="dimmer-mark">DIM</span>
+  <div class="dimmer-wheel-slot"><div id="displayDimmer" class="dimmer-knob" role="slider" tabindex="0" aria-label="Display brightness" aria-valuemin="25" aria-valuemax="100" aria-valuenow="100" title="Drag, scroll, or use arrow keys"></div></div>
+  <span class="dimmer-mark">BRT</span>
+</div>
+</div>
+<div class="instrument-area">
+<div class="section-title advisory-title">Advisories</div>
+<section id="alertPanel" class="alert-panel clear">
+  <div id="alertTitle" class="alert-title">ENGINE PARAMETERS NORMAL</div>
+  <div id="alertList" class="alert-list"></div>
+</section>
+
+<div class="rack-section engine-rack">
+<div class="section-title">Monitors</div>
+<section class="engine-grid">
+ <div class="monitor-module">
+  <article id="card-itt" class="instrument"><div class="label">ITT</div><div class="readout"><span id="itt">---</span></div><div class="unit">deg C</div><div id="sub-itt" class="limit"></div><div class="scale"><div id="bar-itt"></div></div></article>
+  <article id="card-torque" class="instrument"><div class="label">Torque</div><div class="readout"><span id="torque">---</span></div><div class="unit">ft-lb</div><div id="sub-torque" class="limit"></div><div class="scale"><div id="bar-torque"></div></div></article>
+  <article id="card-ng" class="instrument"><div class="label">Gas generator</div><div class="readout"><span id="ng">---</span></div><div class="unit">percent Ng</div><div id="sub-ng" class="limit"></div><div class="scale"><div id="bar-ng"></div></div></article>
+  <article id="card-prop" class="instrument"><div class="label">Propeller</div><div class="readout"><span id="propRpm">---</span></div><div class="unit">RPM</div><div id="sub-prop" class="limit"></div><div class="scale"><div id="bar-prop"></div></div></article>
+ </div>
+ <div class="monitor-module">
+  <article id="card-oilp" class="instrument"><div class="label">Oil pressure</div><div class="readout"><span id="oilPressure">---</span></div><div class="unit">PSI</div><div id="sub-oilp" class="limit"></div><div class="scale"><div id="bar-oilp"></div></div></article>
+  <article id="card-oilt" class="instrument"><div class="label">Oil temperature</div><div class="readout"><span id="oilTemperature">---</span></div><div class="unit">deg C</div><div id="sub-oilt" class="limit"></div><div class="scale"><div id="bar-oilt"></div></div></article>
+  <article class="instrument"><div class="label">Fuel pressure</div><div class="readout"><span id="fuelPressure">---</span></div><div class="unit">PSI</div></article>
+  <article class="instrument"><div class="label">Fuel flow</div><div class="readout"><span id="fuelFlow">---</span></div><div class="unit">PPH</div><div id="sub-fuelflow" class="limit"></div></article>
+ </div>
+</section>
+</div>
+
+<div class="rack-section navigation-rack">
+<section class="aux-grid">
+  <article class="instrument"><div class="label">Magnetic heading</div><div class="readout"><span id="heading">---</span></div></article>
+  <article class="instrument"><div class="label">Heading bug</div><div class="readout heading-bug"><span id="headingBug">---</span></div></article>
+  <article class="instrument"><div class="label">Selected course</div><div class="readout selected-course"><span id="course">---</span></div></article>
+  <article class="instrument"><div class="label">Outside air</div><div class="readout"><span id="oat">---</span></div><div class="unit">deg C</div></article>
+  <article class="instrument"><div class="label">Fuel flow raw</div><div class="readout"><span id="fuelFlowRaw">---</span></div><div class="unit">approx GPH</div></article>
+</section>
+</div>
+</div>
+<div class="event-log-stack">
+<div class="event-log-controls"><button id="clearLastEvent" class="clr-last" type="button">CLR LAST</button></div>
+<aside class="event-log">
+  <div class="event-log-title">Critical Advisory Log</div>
+  <div class="log-screen"><div class="log-status"><span>SESSION</span><span id="logCount">00 EVENTS</span></div><div id="logEvents"><div class="log-empty">NO RECORDED LIMIT EVENTS</div></div></div>
+</aside>
+</div>
+</div>
+</main>
+<div id="firstRunNotice" class="first-run-notice" hidden><strong>THE DASHBOARD RUNS IN THE TRAY</strong>Closing this browser tab does not stop 208 EICAS. Use the upper-right PWR button, or right-click the 208 notification-area icon and choose Exit, to release port 8765.<button id="dismissFirstRun" type="button">GOT IT</button></div>
+<script>
+const $=id=>document.getElementById(id);
+let starterBegan=null,itt1090Began=null,propOverspeedBegan=null,propTransientBegan=null;
+let cruiseCandidateBegan=null,cruiseExitBegan=null,cruiseActive=false;
+let oilBaseline=null,oilBaselineBegan=null,oilBaselinePeak=0;
+let limitEvents=[],activeLimitEvents={},dismissedLimitEvents={};
+const firstRunNotice=$('firstRunNotice');
+if(localStorage.getItem('kabochaTrayNoticeSeen')!=='1')firstRunNotice.hidden=false;
+$('dismissFirstRun').addEventListener('click',()=>{localStorage.setItem('kabochaTrayNoticeSeen','1');firstRunNotice.hidden=true});
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const hdg=v=>String(Math.round(((Number(v)%360)+360)%360)).padStart(3,'0')+'°';
+
+let lastTailDisplay=null;
+const tailSegments={
+  a1:[10,7,28,7],a2:[32,7,50,7],b:[53,10,53,45],c:[53,55,53,90],
+  d1:[32,93,50,93],d2:[10,93,28,93],e:[7,55,7,90],f:[7,10,7,45],
+  g1:[10,50,28,50],g2:[32,50,50,50],h:[11,11,27,45],i:[30,10,30,45],
+  j:[49,11,33,45],k:[49,89,33,55],l:[30,55,30,90],m:[11,89,27,55]
+};
+const tailMap={
+  '0':'a1 a2 b c d1 d2 e f','1':'b c','2':'a1 a2 b g1 g2 e d1 d2',
+  '3':'a1 a2 b c d1 d2 g1 g2','4':'f g1 g2 b c','5':'a1 a2 f g1 g2 c d1 d2',
+  '6':'a1 a2 f e g1 g2 c d1 d2','7':'a1 a2 b c','8':'a1 a2 b c d1 d2 e f g1 g2',
+  '9':'a1 a2 b c d1 d2 f g1 g2','A':'a1 a2 b c e f g1 g2',
+  'B':'a1 a2 b c d1 d2 g1 g2 i l','C':'a1 a2 d1 d2 e f',
+  'D':'a1 a2 b c d1 d2 e f i l','E':'a1 a2 d1 d2 e f g1 g2',
+  'F':'a1 a2 e f g1 g2','G':'a1 a2 c d1 d2 e f g2',
+  'H':'b c e f g1 g2','I':'a1 a2 d1 d2 i l','J':'b c d1 d2 e',
+  'K':'e f g1 h k','L':'d1 d2 e f','M':'b c e f h j',
+  'N':'b c e f h k','O':'a1 a2 b c d1 d2 e f','P':'a1 a2 b e f g1 g2',
+  'Q':'a1 a2 b c d1 d2 e f k','R':'a1 a2 b e f g1 g2 k',
+  'S':'a1 a2 f g1 g2 c d1 d2','T':'a1 a2 i l','U':'b c d1 d2 e f',
+  'V':'e f m k','W':'b c e f m k','X':'h j k m','Y':'h j l',
+  'Z':'a1 a2 j m d1 d2','-':'g1 g2',' ':''
+};
+function renderTail(value){
+  value=(value||'--------').trim().toUpperCase()||'--------';
+  if(value===lastTailDisplay)return;
+  lastTailDisplay=value;
+  const ns='http://www.w3.org/2000/svg',display=document.createElement('span');
+  display.className='seg-display';
+  for(const ch of value){
+    const svg=document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 60 100');
+    svg.setAttribute('aria-hidden','true');
+    svg.classList.add('seg-char');
+    const active=new Set((tailMap[ch]||tailMap[' ']).split(' ').filter(Boolean));
+    for(const name in tailSegments){
+      const p=tailSegments[name],line=document.createElementNS(ns,'line');
+      line.setAttribute('x1',p[0]);line.setAttribute('y1',p[1]);line.setAttribute('x2',p[2]);line.setAttribute('y2',p[3]);
+      if(active.has(name))line.classList.add('on');
+      svg.appendChild(line);
+    }
+    display.appendChild(svg);
+  }
+  const tail=$('tailNumber');tail.textContent='';tail.appendChild(display);tail.title=value;
+}
+function setConnection(connected,message){
+  const status=$('simStatus');
+  status.className='sim-status '+(connected?'connected':'offline');
+  status.title=message||(connected?'Simulator connected':'Simulator disconnected');
+}
+
+function eventTime(date){return date.toLocaleTimeString([],{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function eventKey(title){
+  title=String(title||'EVENT').toUpperCase();
+  if(title.includes('ITT'))return'ITT';
+  if(title.includes('TORQUE'))return'TORQUE';
+  if(title.includes('OIL PRESSURE'))return'OIL PRESSURE';
+  if(title.includes('OIL TEMP'))return'OIL TEMPERATURE';
+  if(title.includes('PROP'))return'PROPELLER';
+  if(title.includes('NG'))return'NG';
+  if(title.includes('STARTER')||title.includes('HUNG START')||title.includes('ABORT START'))return'STARTER';
+  return title;
+}
+function renderLimitEvents(){
+  const host=$('logEvents'),count=$('logCount');if(!host||!count)return;
+  count.textContent=String(limitEvents.length).padStart(2,'0')+' EVENTS';host.textContent='';
+  if(!limitEvents.length){const empty=document.createElement('div');empty.className='log-empty';empty.textContent='NO RECORDED LIMIT EVENTS';host.appendChild(empty);return}
+  limitEvents.slice(0,7).forEach(e=>{
+    const row=document.createElement('div');row.className='log-event'+(e.severity==='critical'?' critical':'');
+    const tm=document.createElement('div');tm.className='log-time';
+    const clock=document.createElement('span');clock.textContent=eventTime(e.started);
+    const sev=document.createElement('span');sev.className='log-severity';sev.textContent=e.severity==='critical'?'LIMIT':'WARN';tm.append(clock,sev);
+    const name=document.createElement('div');name.className='log-name';name.textContent=e.title;
+    const detail=document.createElement('div');detail.className='log-detail';detail.textContent=e.detail;
+    const status=document.createElement('div');status.className='log-cleared';status.textContent=e.active?'ACTIVE':'CLEARED '+eventTime(e.cleared);
+    row.append(tm,name,detail,status);host.appendChild(row);
+  });
+}
+function recordSessionEvent(key,severity,title,detail,active){
+  const now=new Date(),existing=activeLimitEvents[key];
+  if(existing){existing.severity=severity;existing.title=title;existing.detail=detail;renderLimitEvents();return}
+  const event={key,severity,title,detail,started:now,active:active!==false,cleared:active===false?now:null};
+  limitEvents.unshift(event);if(limitEvents.length>20)limitEvents.length=20;
+  if(event.active)activeLimitEvents[key]=event;renderLimitEvents();
+}
+function updateLimitEvents(alerts){
+  const seen={};
+  alerts.filter(a=>a.severity==='critical').forEach(a=>{const key=eventKey(a.title);seen[key]=true;if(!dismissedLimitEvents[key])recordSessionEvent(key,a.severity,a.title,a.detail,true)});
+  Object.keys(activeLimitEvents).forEach(key=>{if(!seen[key]){const e=activeLimitEvents[key];e.active=false;e.cleared=new Date();delete activeLimitEvents[key]}});
+  Object.keys(dismissedLimitEvents).forEach(key=>{if(!seen[key])delete dismissedLimitEvents[key]});
+  renderLimitEvents();
+}
+
+function clearLastLimitEvent(){
+  if(!limitEvents.length)return;
+  const removed=limitEvents.shift();
+  if(removed.active){dismissedLimitEvents[removed.key]=true;delete activeLimitEvents[removed.key]}
+  renderLimitEvents();
+}
+
+function setCard(name,level,sub,pct,greenEnd,amberEnd){
+  const card=$('card-'+name);
+  card.classList.remove('warn','crit');
+  if(level==='warning')card.classList.add('warn');
+  if(level==='critical')card.classList.add('crit');
+  const se=$('sub-'+name);if(se)se.textContent=sub||'';
+  const be=$('bar-'+name);if(be&&Number.isFinite(pct)){
+    be.style.setProperty('--fill',clamp(pct,0,100)+'%');
+    be.style.setProperty('--green-end',clamp(greenEnd,0,100)+'%');
+    be.style.setProperty('--amber-end',clamp(amberEnd,0,100)+'%');
+  }
+}
+function setStart(name,state,value,target){
+  const item=$('start-'+name);
+  item.classList.remove('ready','pending','blocked');
+  item.classList.add(state);
+  $('start-'+name+'-value').textContent=value;
+  const te=$('start-'+name+'-target');if(te&&target)te.textContent=target;
+}
+function renderStartLegacy(d){
+  const selector=Math.round(Number(d.fuelSelector));
+  const leftOpen=selector===1||selector===2;
+  const rightOpen=selector===1||selector===3;
+  const leftQty=Number(d.leftFuelQuantity),rightQty=Number(d.rightFuelQuantity);
+  const fuelIn=Number(d.fuelCutoffHandle)<=80;
+  const firewallIn=Number(d.firewallCutoffHandle)<60;
+  const pump=Math.round(Number(d.fuelPumpSwitch));
+  const condition=Math.round(Number(d.conditionLever));
+  const ng=Number(d.ng);
+  const active=d.starter||ng>5||condition>0;
+  const state=(ok,danger)=>ok?'ready':danger?'blocked':'pending';
+
+  setStart('covers',state(!d.engineCovers,d.engineCovers),d.engineCovers?'INSTALLED':'REMOVED');
+  setStart('left',state(leftOpen&&leftQty>1,active),leftOpen?'ON':'OFF');
+  setStart('right',state(rightOpen&&rightQty>1,active),rightOpen?'ON':'OFF');
+  setStart('fuelcutoff',state(fuelIn,active),fuelIn?'PUSHED IN':'PULLED OUT');
+  setStart('firewall',state(firewallIn,active),firewallIn?'PUSHED IN':'PULLED OUT');
+  setStart('battery',state(d.batteryMaster,d.starter),d.batteryMaster?'ON':'OFF');
+  setStart('voltage',state(Number(d.busVoltage)>=24,d.starter),Number(d.busVoltage).toFixed(1)+' V');
+
+  const pumpReady=ng>=52?(pump===0||pump===1):pump===0;
+  setStart('pump',state(pumpReady,d.starter&&pump!==0),pump===0?'ON':pump===1?'NORM':'OFF',ng>=52?'Normal after start':'On for battery start');
+
+  const conditionText=condition===2?'HIGH IDLE':condition===1?'LOW IDLE':'CUTOFF';
+  const conditionReady=ng<12?condition===0:condition===1||condition===2;
+  const earlyFuel=ng<12&&condition>0;
+  setStart('condition',state(conditionReady,earlyFuel),conditionText,ng<12?'Cutoff until Ng above 12%':'Low idle after Ng above 12%');
+
+  let starterState='pending',starterTarget='Engage starter / stabilize above 12%';
+  if(earlyFuel){starterState='blocked';starterTarget='Fuel introduced below 12% Ng'}
+  else if(d.starter&&ng<12){starterTarget='Motoring / wait for Ng above 12%'}
+  else if(ng>=12&&condition===0){starterTarget='Move condition lever to low idle'}
+  else if(d.starter&&ng<52){starterTarget='Monitor start / wait for Ng above 52%'}
+  else if(d.starter&&ng>=52){starterTarget='Disengage starter'}
+  else if(!d.starter&&ng>=52){starterState='ready';starterTarget='Start complete'}
+  setStart('starter',starterState,(d.starter?'START':'OFF')+' · '+ng.toFixed(1)+'%',starterTarget);
+}
+let startCycleActive=false,startComplete=false,shutdownBegan=null,sequenceStarterBegan=null;
+let prePassed={},prePassedValue={},startPassed={};
+function resetStartSequence(){
+  startCycleActive=false;startComplete=false;shutdownBegan=null;sequenceStarterBegan=null;
+  prePassed={};prePassedValue={};startPassed={};
+  oilBaseline=null;oilBaselineBegan=null;oilBaselinePeak=0;
+  propOverspeedBegan=null;propTransientBegan=null;
+  cruiseCandidateBegan=null;cruiseExitBegan=null;cruiseActive=false;
+}
+function setRail(prefix,name,state,value,target){
+  const item=$(prefix+'-'+name);
+  const valueElement=$(prefix+'-'+name+'-value');
+  if(!item||!valueElement){console.warn('Missing dashboard row: '+prefix+'-'+name);return}
+  item.classList.remove('ready','pending','blocked','action-ready','time-warning','abort-action');item.classList.add(state);
+  valueElement.textContent=value;
+  const te=$(prefix+'-'+name+'-target');if(te&&target)te.textContent=target;
+}
+function renderStartTwoPhase(d){
+  const now=Date.now(),selector=Math.round(Number(d.fuelSelector));
+  const leftOpen=selector===1||selector===2,rightOpen=selector===1||selector===3;
+  const leftQty=Number(d.leftFuelQuantity),rightQty=Number(d.rightFuelQuantity);
+  const fuelIn=Number(d.fuelCutoffHandle)<=80,firewallIn=Number(d.firewallCutoffHandle)<60;
+  const pump=Math.round(Number(d.fuelPumpSwitch)),condition=Math.round(Number(d.conditionLever));
+  const ng=Number(d.ng),fuelFlow=Number(d.fuelFlow),busVoltage=Number(d.busVoltage);
+  if(d.starter||ng>5)startCycleActive=true;
+  const preNow={covers:!d.engineCovers,left:leftOpen&&leftQty>1,right:rightOpen&&rightQty>1,
+    fuelcutoff:fuelIn,firewall:firewallIn,
+    prop:Number(d.propLeverPosition)>=95,power:Number(d.powerLeverPosition)>=15&&Number(d.powerLeverPosition)<=35,
+    inertial:!!d.inertialSeparator};
+  const preValue={covers:d.engineCovers?'INSTALLED':'REMOVED',
+    left:leftOpen?'OPEN':'CLOSED',
+    right:rightOpen?'OPEN':'CLOSED',
+    fuelcutoff:fuelIn?'PUSHED IN':'PULLED OUT',firewall:firewallIn?'PUSHED IN':'PULLED OUT',
+    prop:Number(d.propLeverPosition).toFixed(0)+'%',power:Number(d.powerLeverPosition).toFixed(0)+'%',
+    inertial:d.inertialSeparator?'OPEN':'CLOSED'};
+  if(startCycleActive)Object.keys(preNow).forEach(k=>{if(preNow[k]&&!prePassed[k]){prePassed[k]=true;prePassedValue[k]=preValue[k]}});
+  Object.keys(preNow).forEach(k=>{
+    const latched=startCycleActive&&prePassed[k];
+    setRail('pre',k,(preNow[k]||latched)?'ready':'blocked',latched?prePassedValue[k]:preValue[k]);
+  });
+
+  const batteryReady=!!d.batteryMaster&&busVoltage>=24,pumpOn=pump===0;
+  if(startCycleActive&&batteryReady)startPassed.battery=true;
+  if(startCycleActive&&pumpOn)startPassed.pump=true;
+  if(ng>=12&&condition>0)startPassed.condition=true;
+  if(ng>=52&&!d.starter&&fuelFlow>1){startComplete=true;startPassed.starter=true}
+  const stopped=startCycleActive&&!d.starter&&ng<5&&fuelFlow<1;
+  if(stopped){if(!shutdownBegan)shutdownBegan=now;else if(now-shutdownBegan>=3000)resetStartSequence()}
+  else shutdownBegan=null;
+
+  const batteryLatched=startCycleActive&&startPassed.battery;
+  setRail('start','battery',(batteryReady||batteryLatched)?'ready':'blocked',batteryLatched&&!batteryReady?'PASSED':d.batteryMaster?'ON':'OFF');
+  $('start-voltage-value').textContent='BUS '+busVoltage.toFixed(1)+' V';
+  const pumpLatched=startCycleActive&&startPassed.pump;
+  const pumpReady=startComplete?(pumpLatched||pump===1):pumpOn||pumpLatched;
+  setRail('start','pump',pumpReady?'ready':d.starter?'blocked':'pending',pump===0?'ON':pump===1?'NORM':'OFF',startComplete?'Normal after start':'On for battery start');
+
+  const conditionText=condition===2?'HIGH IDLE':condition===1?'LOW IDLE':'CUTOFF';
+  const conditionReady=ng<12?condition===0:condition===1||condition===2;
+  const earlyFuel=ng<12&&condition>0,conditionDone=startComplete&&startPassed.condition;
+  setRail('start','condition',conditionDone||conditionReady?'ready':earlyFuel?'blocked':'pending',conditionDone?'PASSED':conditionText,conditionDone?'Fuel introduced above 12% Ng':ng<12?'Cutoff until Ng above 12%':'Low idle after Ng above 12%');
+  let starterState='pending',starterTarget='Engage starter / stabilize above 12%';
+  if(startComplete){starterState='ready';starterTarget='Start complete / sequence latched'}
+  else if(earlyFuel){starterState='blocked';starterTarget='Fuel introduced below 12% Ng'}
+  else if(d.starter&&ng<12)starterTarget='Motoring / wait for Ng above 12%';
+  else if(ng>=12&&condition===0)starterTarget='Move condition lever to low idle';
+  else if(d.starter&&ng<52)starterTarget='Monitor start / wait for Ng above 52%';
+  else if(d.starter&&ng>=52)starterTarget='Disengage starter';
+  setRail('start','starter',starterState,d.starter?'START':'OFF',starterTarget);
+}
+function renderStart(d){
+  const now=Date.now(),selector=Math.round(Number(d.fuelSelector));
+  const leftOpen=selector===1||selector===2,rightOpen=selector===1||selector===3;
+  const leftQty=Number(d.leftFuelQuantity),rightQty=Number(d.rightFuelQuantity);
+  const fuelIn=Number(d.fuelCutoffHandle)<=80,firewallIn=Number(d.firewallCutoffHandle)<60;
+  const pump=Math.round(Number(d.fuelPumpSwitch)),condition=Math.round(Number(d.conditionLever));
+  const ng=Number(d.ng),fuelFlow=Number(d.fuelFlow),busVoltage=Number(d.busVoltage),motorActive=!!d.starterActive;
+  const cranking=motorActive||ng>5,justStarted=!startCycleActive&&cranking;
+  if(motorActive){if(!sequenceStarterBegan)sequenceStarterBegan=now}else sequenceStarterBegan=null;
+  if(cranking)startCycleActive=true;
+
+  const preNow={covers:!d.engineCovers,left:leftOpen&&leftQty>1,right:rightOpen&&rightQty>1,
+    fuelcutoff:fuelIn,firewall:firewallIn,
+    prop:Number(d.propLeverPosition)>=95,power:Number(d.powerLeverPosition)>=15&&Number(d.powerLeverPosition)<=35,
+    inertial:!!d.inertialSeparator};
+  const preValue={covers:d.engineCovers?'INSTALLED':'REMOVED',
+    left:leftOpen?'OPEN':'CLOSED',right:rightOpen?'OPEN':'CLOSED',
+    fuelcutoff:fuelIn?'PUSHED IN':'PULLED OUT',firewall:firewallIn?'PUSHED IN':'PULLED OUT',
+    prop:Number(d.propLeverPosition).toFixed(0)+'%',power:Number(d.powerLeverPosition).toFixed(0)+'%',inertial:d.inertialSeparator?'OPEN':'CLOSED'};
+  if(startCycleActive)Object.keys(preNow).forEach(k=>{if(preNow[k]&&!prePassed[k]){prePassed[k]=true;prePassedValue[k]=preValue[k]}});
+  Object.keys(preNow).forEach(k=>{const latched=startCycleActive&&prePassed[k];setRail('pre',k,(preNow[k]||latched)?'ready':'blocked',latched?prePassedValue[k]:preValue[k])});
+
+  const batteryReady=!!d.batteryMaster&&busVoltage>=24,pumpOn=pump===0,conditionCutoff=condition===0;
+  if(justStarted){
+    if(batteryReady)startPassed.battery=true;
+    if(pumpOn)startPassed.pump=true;
+    if(conditionCutoff)startPassed.condition=true;
+    startPassed.starter=true;
+  }
+  setRail('start','battery',(batteryReady||(startCycleActive&&startPassed.battery))?'ready':'blocked',startCycleActive&&startPassed.battery?'PASSED':d.batteryMaster?'ON':'OFF');
+  $('start-voltage-value').textContent='BUS '+busVoltage.toFixed(1)+' V';
+  setRail('start','pump',(pumpOn||(startCycleActive&&startPassed.pump))?'ready':'blocked',startCycleActive&&startPassed.pump?'PASSED':pump===0?'ON':pump===1?'NORM':'OFF','On before engaging starter');
+  setRail('start','condition',(conditionCutoff||(startCycleActive&&startPassed.condition))?'ready':'blocked',startCycleActive&&startPassed.condition?'PASSED':condition===2?'HIGH IDLE':condition===1?'LOW IDLE':'CUTOFF','Cutoff before engaging starter');
+  const allPreReady=Object.keys(preNow).every(k=>preNow[k]);
+  const engageReady=!startCycleActive&&!d.starter&&ng<5&&allPreReady&&batteryReady&&pumpOn&&conditionCutoff;
+  setRail('start','starter',startCycleActive&&startPassed.starter?'ready':engageReady?'action-ready':!d.starter&&ng<5?'pending':'blocked',startCycleActive&&startPassed.starter?'ENGAGED':engageReady?'ENGAGE':d.starter?'START':'OFF',startCycleActive?'Start permission captured':engageReady?'Engage starter now':'Complete all permissives');
+
+  if(!startCycleActive){
+    setRail('seq','condition','pending','WAIT','Low idle above 12% Ng');
+    setRail('seq','starter','pending','WAIT','Off at 52% Ng');
+    setRail('seq','pump','pending','WAIT','Normal after starter off');
+    setRail('seq','ready','pending','NOT READY','Engage starter to begin');
+  }else{
+    const earlyFuel=ng<12&&condition>0;
+    if(ng>=12&&condition>0)startPassed.seqCondition=true;
+    const conditionDone=!!startPassed.seqCondition;
+    const moveCondition=ng>=12&&!conditionDone&&condition===0;
+    setRail('seq','condition',conditionDone?'ready':earlyFuel?'blocked':moveCondition?'action-ready':'pending',conditionDone?(condition===2?'HIGH IDLE':'LOW IDLE'):earlyFuel?'TOO EARLY':moveCondition?'MOVE TO LOW IDLE':condition===2?'HIGH IDLE':condition===1?'LOW IDLE':'CUTOFF',conditionDone?'Fuel introduced above 12% Ng':moveCondition?'Move condition lever now':'Hold cutoff until 12% Ng');
+
+    if(ng>=52&&!d.starter)startPassed.seqStarter=true;
+    const starterDone=!!startPassed.seqStarter;
+    const turnStarterOff=ng>=52&&!starterDone&&d.starter;
+    const starterSeconds=sequenceStarterBegan?(now-sequenceStarterBegan)/1000:0;
+    const abortStart=motorActive&&ng<52&&starterSeconds>=30;
+    setRail('seq','starter',starterDone?'ready':turnStarterOff?'action-ready':abortStart?'abort-action':!motorActive&&ng<52?'pending':'pending',starterDone?'OFF':turnStarterOff?'TURN OFF':abortStart?'ABORT START':motorActive?'MOTOR ON':d.starter?'START SELECTED':'OFF',starterDone?'Starter switch off confirmed':turnStarterOff?'Motor stopped - move switch off':abortStart?'30 second motor limit - abort start':motorActive?'Starter motor running':'Motor disengaged / monitor Ng');
+
+    if(starterDone&&pump===1)startPassed.seqPump=true;
+    const pumpDone=!!startPassed.seqPump;
+    const setPumpNormal=starterDone&&!pumpDone&&pump!==1;
+    setRail('seq','pump',pumpDone?'ready':setPumpNormal?'action-ready':pump!==0&&!starterDone?'blocked':'pending',pumpDone?'NORM':setPumpNormal?'SET TO NORMAL':pump===0?'ON':pump===1?'NORM':'OFF',pumpDone?'After-start position confirmed':setPumpNormal?'Set boost pump to NORM now':'Hold ON until starter is off');
+
+    startComplete=conditionDone&&starterDone&&pumpDone&&ng>=52&&fuelFlow>1;
+    setRail('seq','ready',startComplete?'ready':'pending',startComplete?'FLIGHT READY':'NOT READY',startComplete?'Start sequence complete':'Complete the highlighted actions');
+  }
+
+  const stopped=startCycleActive&&!d.starter&&ng<5&&fuelFlow<1;
+  if(stopped){if(!shutdownBegan)shutdownBegan=now;else if(now-shutdownBegan>=3000)resetStartSequence()}
+  else shutdownBegan=null;
+}
+function pushAlert(a,severity,title,detail){a.push({severity,title,detail})}
+function phaseOf(d){
+  if(d.starterActive||(d.ng>0&&d.ng<52&&d.fuelFlow>0))return'STARTING';
+  if(d.onGround){cruiseCandidateBegan=null;cruiseExitBegan=null;cruiseActive=false;return'TAKEOFF'}
+  const now=Date.now(),stable=Math.abs(Number(d.verticalSpeed))<=100;
+  if(stable){
+    cruiseExitBegan=null;
+    if(!cruiseCandidateBegan)cruiseCandidateBegan=now;
+    if(now-cruiseCandidateBegan>=5000)cruiseActive=true;
+  }else{
+    cruiseCandidateBegan=null;
+    if(cruiseActive){
+      if(!cruiseExitBegan)cruiseExitBegan=now;
+      if(now-cruiseExitBegan>=2000){cruiseActive=false;cruiseExitBegan=null}
+    }
+  }
+  return cruiseActive?'CRUISE':'CLIMB';
+}
+function ngLimit(oat){return oat>=-30?101.6:101.6-Math.floor((-30-oat)/10)*2.2}
+function normalCruiseGuide(pressureAltitude,aircraftTitle){
+  const amphib=String(aircraftTitle||'').toUpperCase().includes('AMPHIB');
+  const points=amphib?[[4000,1600,365],[8000,1500,334],[12000,1400,308],[16000,1335,284],[20000,1185,265]]:[[4000,1600,365],[8000,1500,334],[12000,1400,308],[16000,1335,284],[22000,1175,256]];
+  const altitude=Number(pressureAltitude);
+  if(altitude<=points[0][0])return{torque:points[0][1],fuel:points[0][2],altitude:points[0][0],clamped:true};
+  const last=points[points.length-1];
+  if(altitude>=last[0])return{torque:last[1],fuel:last[2],altitude:last[0],clamped:true};
+  for(let i=1;i<points.length;i++)if(altitude<=points[i][0]){
+    const low=points[i-1],high=points[i],ratio=(altitude-low[0])/(high[0]-low[0]);
+    return{torque:Math.round((low[1]+(high[1]-low[1])*ratio)/5)*5,fuel:Math.round(low[2]+(high[2]-low[2])*ratio),altitude:Math.round(altitude),clamped:false};
+  }
+  return{torque:last[1],fuel:last[2],altitude:last[0],clamped:true};
+}
+function analyze(d){
+  const alerts=[],phase=phaseOf(d),now=Date.now();
+  let iw=740,ic=765,imax=805,il='MAX 765 C';
+  if(phase==='STARTING'){iw=805;ic=1090;imax=1120;il='MAX 1090 C / 2 SEC'}
+  else if(phase==='TAKEOFF'){iw=765;ic=805;imax=850;il='MAX 805 C'}
+  else if(phase==='CRUISE'){iw=740;ic=765;il='GUIDE <720 · LIMIT 740 C'}
+  let ittLevel=d.itt>=ic?'critical':d.itt>=iw?'warning':'normal';
+  if(phase==='STARTING'&&d.itt>=1090){
+    if(!itt1090Began)itt1090Began=now;
+    const sec=(now-itt1090Began)/1000;
+    pushAlert(alerts,sec>=2?'critical':'warning','START ITT',d.itt.toFixed(0)+' C / '+sec.toFixed(1)+' SEC');
+  }else{
+    itt1090Began=null;
+    if(ittLevel==='critical')pushAlert(alerts,'critical','ITT LIMIT',d.itt.toFixed(0)+' C / '+il);
+    else if(ittLevel==='warning')pushAlert(alerts,'warning','HIGH ITT',d.itt.toFixed(0)+' C / '+il);
+  }
+  if(d.onGround&&!d.starterActive&&d.ng<5&&d.itt>150)pushAlert(alerts,'warning','HOT RESTART','ITT '+d.itt.toFixed(0)+' C / DRY MOTOR RECOMMENDED');
+  const conditionPosition=Math.round(Number(d.conditionLever));
+  if(conditionPosition>0&&Number(d.ng)>0.5&&Number(d.ng)<12){
+    const conditionText=conditionPosition===2?'HIGH IDLE':'LOW IDLE';
+    pushAlert(alerts,'critical','HOT START',conditionText+' / NG '+Number(d.ng).toFixed(1)+'%');
+  }
+
+  let tqLevel=d.torque>1970?'critical':d.torque>1865?'warning':'normal';
+  if(d.torque>2400)pushAlert(alerts,'critical','TORQUE TRANSIENT',d.torque.toFixed(0)+' FT-LB');
+  else if(d.torque>1970)pushAlert(alerts,'critical','TORQUE LIMIT',d.torque.toFixed(0)+' FT-LB');
+  else if(d.torque>1865)pushAlert(alerts,'warning','HIGH TORQUE',d.torque.toFixed(0)+' FT-LB');
+
+  const nl=ngLimit(d.oat);
+  let ngLevel=d.ng>102.6?'critical':d.ng>nl?'warning':'normal';
+  if(d.ng>102.6)pushAlert(alerts,'critical','NG TRANSIENT',d.ng.toFixed(1)+'%');
+  else if(d.ng>nl)pushAlert(alerts,'warning','NG LIMIT',d.ng.toFixed(1)+'% / LIMIT '+nl.toFixed(1)+'%');
+
+  let propLevel='normal';
+  if(d.propRpm>1900){
+    if(!propOverspeedBegan)propOverspeedBegan=now;
+    const propSeconds=(now-propOverspeedBegan)/1000;
+    let transientSeconds=0;
+    if(d.propRpm>2090){if(!propTransientBegan)propTransientBegan=now;transientSeconds=(now-propTransientBegan)/1000}
+    else propTransientBegan=null;
+    if(transientSeconds>2){
+      propLevel='critical';
+      pushAlert(alerts,'critical','PROP TRANSIENT',d.propRpm.toFixed(0)+' RPM / '+transientSeconds.toFixed(1)+' SEC ABOVE 2090');
+    }else if(propSeconds>15){
+      propLevel='critical';
+      pushAlert(alerts,'critical','PROP OVERSPEED LIMIT',d.propRpm.toFixed(0)+' RPM / '+propSeconds.toFixed(1)+' SEC ABOVE 1900');
+    }else if(propSeconds>2){
+      propLevel='warning';
+      pushAlert(alerts,'warning','PROP OVERSPEED',d.propRpm.toFixed(0)+' RPM / '+propSeconds.toFixed(1)+' SEC ABOVE 1900');
+    }
+  }else{propOverspeedBegan=null;propTransientBegan=null}
+
+  let op='normal',opd='Baseline captures 5 sec after 52% Ng';
+  const oilPressure=Number(d.oilPressure),oilNg=Number(d.ng);
+  if(oilNg>=52&&oilPressure>0){
+    if(!oilBaselineBegan){oilBaselineBegan=now;oilBaselinePeak=oilPressure}
+    oilBaselinePeak=Math.max(oilBaselinePeak,oilPressure);
+    if(oilBaseline===null&&now-oilBaselineBegan>=5000)oilBaseline=oilBaselinePeak;
+  }
+  const intentionalGroundShutdown=!!d.onGround&&Math.round(Number(d.conditionLever))===0&&!d.starterActive;
+  if(oilBaseline!==null&&oilBaseline>0){
+    const oilDrop=(oilBaseline-oilPressure)/oilBaseline*100;
+    opd=intentionalGroundShutdown?'Shutdown · pressure decay expected':'Post-start baseline '+oilBaseline.toFixed(0)+' PSI';
+    if(oilDrop>=40&&!intentionalGroundShutdown){
+      op='critical';
+      pushAlert(alerts,'critical','OIL PRESSURE DROP',oilPressure.toFixed(0)+' PSI / '+oilDrop.toFixed(0)+'% BELOW BASELINE');
+    }
+  }
+  if(oilPressure>105){op='critical';pushAlert(alerts,'critical','HIGH OIL PRESSURE',oilPressure.toFixed(0)+' PSI')}
+  let ot=d.oilTemperature>=104?'critical':d.oilTemperature>99?'warning':'normal';
+  if(d.oilTemperature>=104)pushAlert(alerts,'critical','OIL TEMPERATURE',d.oilTemperature.toFixed(0)+' C');
+  else if(d.oilTemperature>99)pushAlert(alerts,'warning','HIGH OIL TEMP',d.oilTemperature.toFixed(0)+' C');
+
+  if(d.starterActive){
+    if(!starterBegan)starterBegan=now;
+    const sec=(now-starterBegan)/1000;
+    if(sec>=30)pushAlert(alerts,'critical','STARTER LIMIT',sec.toFixed(0)+' SEC / ABORT START');
+    if(d.fuelFlow>0&&d.ng<52&&sec>=30)pushAlert(alerts,'critical','POSSIBLE HUNG START','NG '+d.ng.toFixed(1)+'%');
+  }else starterBegan=null;
+
+  const fuelWeight=Number(d.fuelWeightPerGallon);
+  if(fuelWeight>0){
+    const leftPounds=Number(d.leftFuelQuantity)*fuelWeight,rightPounds=Number(d.rightFuelQuantity)*fuelWeight;
+    const difference=Math.abs(leftPounds-rightPounds);
+    if(difference>=200){
+      const lowerLeft=leftPounds<rightPounds,selector=Math.round(Number(d.fuelSelector));
+      const lowerOpen=lowerLeft?(selector===1||selector===2):(selector===1||selector===3);
+      const lowerTank=lowerLeft?'LEFT':'RIGHT';
+      const action=lowerOpen?'CLOSE '+lowerTank+' TANK':lowerTank+' TANK CLOSED';
+      pushAlert(alerts,difference>=250?'critical':'warning','FUEL IMBALANCE',difference.toFixed(0)+' LB / '+action);
+    }
+  }
+  return{alerts,phase,ittLevel,tqLevel,ngLevel,propLevel,op,ot,il,nl,opd,iw,ic,imax};
+}
+function render(d){
+  renderStart(d);
+  renderTail((d.tailNumber&&d.tailNumber.trim())?d.tailNumber.trim():'--------');
+  $('itt').textContent=Number(d.itt).toFixed(0);
+  $('torque').textContent=Number(d.torque).toFixed(0);
+  $('ng').textContent=Number(d.ng).toFixed(1);
+  $('propRpm').textContent=Number(d.propRpm).toFixed(0);
+  $('oilPressure').textContent=Number(d.oilPressure).toFixed(0);
+  $('oilTemperature').textContent=Number(d.oilTemperature).toFixed(0);
+  $('fuelPressure').textContent=Number(d.fuelPressure).toFixed(1);
+  $('fuelFlow').textContent=Number(d.fuelFlow).toFixed(0);
+  $('fuelFlowRaw').textContent=(Number(d.fuelFlow)/6.7).toFixed(1);
+  $('oat').textContent=Number(d.oat).toFixed(0);
+  $('heading').textContent=hdg(Number(d.heading)*3.6);
+  $('headingBug').textContent=hdg(d.headingBug);
+  $('course').textContent=hdg(d.course);
+
+  const a=analyze(d);
+  updateLimitEvents(a.alerts);
+  const cruiseGuide=a.phase==='CRUISE'?normalCruiseGuide(d.pressureAltitude,d.aircraftTitle):null;
+  const ittText=a.phase==='CRUISE'?'GUIDE <720 · LIMIT 740 C':a.il;
+  const torqueText=cruiseGuide?'GUIDE '+cruiseGuide.torque+' · LIMIT 1865 FT-LB':'MAX 1865 FT-LB';
+  const ngText=a.phase==='CRUISE'?'GUIDE <99 · LIMIT '+a.nl.toFixed(1)+'%':'MAX '+a.nl.toFixed(1)+'%';
+  const propText=a.phase==='CRUISE'?'GUIDE 1750 · LIMIT 1900 RPM':'MAX 1900 · 2090 / 2 SEC';
+  setCard('itt',a.ittLevel,ittText,d.itt/a.imax*100,a.iw/a.imax*100,a.ic/a.imax*100);
+  setCard('torque',a.tqLevel,torqueText,d.torque/2400*100,1865/2400*100,1970/2400*100);
+  setCard('ng',a.ngLevel,ngText,d.ng/105*100,a.nl/105*100,102.6/105*100);
+  setCard('prop',a.propLevel,propText,d.propRpm/2200*100,1900/2200*100,2090/2200*100);
+  setCard('oilp',a.op,a.opd,d.oilPressure/120*100,100/120*100,105/120*100);
+  setCard('oilt',a.ot,'99 CONTINUOUS / 104 TRANSIENT',d.oilTemperature/110*100,99/110*100,104/110*100);
+  $('sub-fuelflow').textContent=cruiseGuide?'GUIDE '+cruiseGuide.fuel+' PPH · ISA · '+Math.round(Number(d.pressureAltitude))+' FT PA':'';
+
+  const p=$('alertPanel'),t=$('alertTitle'),l=$('alertList');
+  l.innerHTML='';
+  const worst=a.alerts.some(x=>x.severity==='critical')?'critical':a.alerts.length?'warning':'clear';
+  p.className='alert-panel '+worst;
+  t.textContent=worst==='critical'?'WARNING - ENGINE LIMIT':worst==='warning'?'CAUTION - CHECK ENGINE':'ENGINE PARAMETERS NORMAL';
+  a.alerts.forEach(x=>{const e=document.createElement('div');e.className='alert';const logged=x.severity==='critical'?' - EVENT LOGGED':'';e.innerHTML='<strong>'+x.title+logged+'</strong>'+x.detail;l.appendChild(e)});
+}
+async function refresh(){
+  try{
+    const r=await fetch('/api/data',{cache:'no-store'}),d=await r.json();
+    const operational=!!d.connected&&!!d.aircraftCompatible;
+    $('app').classList.toggle('offline',!operational);
+    setConnection(operational,d.message);
+    if(operational)render(d);else resetStartSequence();
+  }catch (_error) {resetStartSequence();$('app').classList.add('offline');setConnection(false,'Local service offline')}
+}
+
+const displayDimmer=$('displayDimmer');
+let displayBrightness=Math.max(25,Math.min(100,Number(localStorage.getItem('kabochaDisplayBrightness'))||100));
+function setDisplayBrightness(value){
+  displayBrightness=Math.max(25,Math.min(100,Math.round(value)));
+  document.documentElement.style.setProperty('--display-level',(displayBrightness/100).toFixed(2));
+  displayDimmer.style.transform='rotate('+(-135+(displayBrightness-25)/75*270)+'deg)';
+  displayDimmer.setAttribute('aria-valuenow',displayBrightness);
+  displayDimmer.title='Display brightness '+displayBrightness+'% - drag, scroll, or use arrow keys';
+  localStorage.setItem('kabochaDisplayBrightness',String(displayBrightness));
+}
+function brightnessFromPointer(event){
+  const box=displayDimmer.getBoundingClientRect(),cx=box.left+box.width/2,cy=box.top+box.height/2;
+  let angle=Math.atan2(event.clientY-cy,event.clientX-cx)*180/Math.PI+90;
+  if(angle>180)angle-=360;
+  angle=Math.max(-135,Math.min(135,angle));
+  setDisplayBrightness(25+(angle+135)/270*75);
+}
+displayDimmer.addEventListener('pointerdown',event=>{displayDimmer.setPointerCapture(event.pointerId);brightnessFromPointer(event)});
+displayDimmer.addEventListener('pointermove',event=>{if(displayDimmer.hasPointerCapture(event.pointerId))brightnessFromPointer(event)});
+displayDimmer.addEventListener('wheel',event=>{event.preventDefault();setDisplayBrightness(displayBrightness+(event.deltaY<0?5:-5))},{passive:false});
+displayDimmer.addEventListener('keydown',event=>{
+  if(event.key==='ArrowRight'||event.key==='ArrowUp'){event.preventDefault();setDisplayBrightness(displayBrightness+5)}
+  if(event.key==='ArrowLeft'||event.key==='ArrowDown'){event.preventDefault();setDisplayBrightness(displayBrightness-5)}
+  if(event.key==='Home'){event.preventDefault();setDisplayBrightness(25)}
+  if(event.key==='End'){event.preventDefault();setDisplayBrightness(100)}
+});
+$('clearLastEvent').addEventListener('click',clearLastLimitEvent);
+const powerButton=$('powerButton');let powerHoldTimer=null;
+function cancelPowerHold(){if(powerHoldTimer){clearTimeout(powerHoldTimer);powerHoldTimer=null}powerButton.classList.remove('holding')}
+function beginPowerHold(event){
+  if(event.type==='pointerdown'&&event.button!==0)return;
+  cancelPowerHold();powerButton.classList.add('holding');
+  powerHoldTimer=setTimeout(async()=>{
+    powerHoldTimer=null;
+    try{
+      await fetch('/api/shutdown',{method:'POST',headers:{'X-Kabocha-Shutdown':'208'}});
+      document.body.innerHTML='<main style="max-width:560px;margin:12vh auto;padding:30px;text-align:center"><h1>208 EICAS</h1><p style="margin-top:25px;color:#9bc783;font-family:Consolas,monospace">DASHBOARD SHUT DOWN<br><br>PORT 8765 RELEASED</p></main>';
+    }catch (_error) {}
+  },1200);
+}
+powerButton.addEventListener('pointerdown',beginPowerHold);
+powerButton.addEventListener('pointerup',cancelPowerHold);
+powerButton.addEventListener('pointerleave',cancelPowerHold);
+powerButton.addEventListener('pointercancel',cancelPowerHold);
+powerButton.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&!powerHoldTimer){event.preventDefault();beginPowerHold(event)}});
+powerButton.addEventListener('keyup',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();cancelPowerHold()}});
+setDisplayBrightness(displayBrightness);
+refresh();setInterval(refresh,100);
+</script>
+  <script src="PortraitMode.js?v=11"></script>
+</body>
+</html>
