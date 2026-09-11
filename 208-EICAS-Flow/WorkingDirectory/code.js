@@ -197,6 +197,19 @@ function clearLastLimitEvent(){
   if(removed.active){dismissedLimitEvents[removed.key]=true;delete activeLimitEvents[removed.key]}
   renderLimitEvents();
 }
+function exportLimitEvents(){
+  const lines=['208 EICAS Critical Advisory Log','Exported '+new Date().toLocaleString(),''];
+  if(!limitEvents.length)lines.push('NO RECORDED LIMIT EVENTS');
+  else [...limitEvents].reverse().forEach(e=>{
+    const status=e.active?'ACTIVE':'CLEARED '+eventTime(e.cleared);
+    lines.push(eventTime(e.started)+'  '+(e.severity==='critical'?'LIMIT':'WARN')+'  '+e.title+'  '+e.detail+'  '+status);
+  });
+  const blob=new Blob([lines.join('\r\n')],{type:'text/plain'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='208-EICAS-log-'+new Date().toISOString().replace(/[:.]/g,'-')+'.txt';
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+}
 
 function setCard(name,level,sub,pct,greenEnd,amberEnd){
   const card=$('card-'+name);
@@ -598,6 +611,7 @@ displayDimmer.addEventListener('keydown',event=>{
   if(event.key==='End'){event.preventDefault();setDisplayBrightness(100)}
 });
 $('clearLastEvent').addEventListener('click',clearLastLimitEvent);
+$('exportLog').addEventListener('click',exportLimitEvents);
 const powerButton=$('powerButton');
 if(powerButton){
   powerButton.title='Close 208 EICAS';

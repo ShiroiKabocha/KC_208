@@ -1,4 +1,4 @@
-208 EICAS v1.0
+208 EICAS v1.1
 
 
 Thank you for downloading the Kabocha 208 EICAS system, manufactured by Kabocha Industries-your leader in anachronistic simulator add-ons.
@@ -16,7 +16,7 @@ REQUIREMENTS
 
 INSTALLATION
 ------------
-1. Extract the entire 208-EICAS-v1.0 folder somewhere convenient.
+1. Extract the entire 208-EICAS-v1.1 folder somewhere convenient.
 2. Do not place it in the MSFS Community folder. This is an external application.
 3. Keep 208 EICAS.exe and SimConnect.dll together in the same folder.
 4. Start MSFS and load the Black Square Caravan Professional.
@@ -39,7 +39,7 @@ WHAT IT MONITORS
 - Wing-tank fuel imbalance by actual simulator fuel weight
 - Starter timing and start-limit protection during hung starts.
 - Aircraft heading, heading bug, selected course, and outside temperature
-- Session-based critical limit-exceedance log
+- Session-based critical limit-exceedance log, exportable as a .txt file
 - Phase-aware engine-card references: takeoff and climb limits, plus cruise
   targets derived from the manual's Normal Cruise table using pressure altitude
 
@@ -66,7 +66,7 @@ aircraft and does not replace the full pre-flight checklists. Always follow the 
 manual and in-simulator checklists.
 
 The limit-event log exists only for the current application session. Closing or refreshing the browser window clears it.
-You can also press the 'CLR Last' button to remove the last event log captured.
+You can also press the 'CLR Last' button to remove the last event log captured, or press 'SAVE LOG' to download every recorded event as a .txt file before it is lost.
 
 TROUBLESHOOTING
 ---------------

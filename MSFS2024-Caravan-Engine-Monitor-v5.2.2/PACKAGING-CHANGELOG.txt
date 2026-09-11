@@ -1,6 +1,11 @@
 208 EICAS
 CHANGELOG
 
+v1.1
+----
+- Added a SAVE LOG button to the Critical Advisory Log (browser dashboard and
+  Flow widget) that exports every recorded exceedance event to a .txt file.
+
 v1.0
 ----
 - Initial release.
