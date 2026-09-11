@@ -28,7 +28,7 @@ Our state-of-the-art Advisories panel, located at the top center of your panel, 
 
 Any critical exceedance of an engine or powerplant tolerance will produce an alert message on the Critical Advisory Log screen, located at the far right of your panel. This screen tracks any critical states for the duration of your flight. These are events that will likely lead to engine or powerplant damage if not corrected in a timely manner.
 
-You can remove the last logged event by clicking the `CLR LAST` button on your console.
+You can remove the last logged event by clicking the `CLR LAST` button on your console. Click `EXPORT TXT` to download every event retained in the current session, including its start time, details, and active or cleared status.
 
 See the Alerts page for more details.
 

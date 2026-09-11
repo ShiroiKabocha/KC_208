@@ -1,10 +1,12 @@
 208 EICAS
 CHANGELOG
 
-v1.1
-----
-- Added a SAVE LOG button to the Critical Advisory Log (browser dashboard and
-  Flow widget) that exports every recorded exceedance event to a .txt file.
+v1.1.0
+------
+- Added EXPORT TXT to the browser dashboard, native dashboard, and Flow widget
+  to save every retained critical advisory from the current session.
+- Added session, export, event, and cleared-status timestamps to browser log exports.
+- Removed the browser dashboard's previous 20-event session limit.
 
 v1.0
 ----

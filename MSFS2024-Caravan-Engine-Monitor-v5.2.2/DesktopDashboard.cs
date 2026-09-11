@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 internal sealed class DashboardData
@@ -31,6 +33,7 @@ internal sealed class DesktopDashboard : Form
     private readonly Dictionary<string, bool> preLatch = new Dictionary<string, bool>();
     private readonly Dictionary<string, string> preLatchValue = new Dictionary<string, string>();
     private readonly List<string> events = new List<string>();
+    private readonly DateTime sessionStarted = DateTime.Now;
     private readonly Dictionary<string, bool> activeCritical = new Dictionary<string, bool>();
     private readonly Label tail = new Label(), advisoryTitle = new Label(), advisoryLines = new Label(), connection = new Label(), logCount = new Label();
     private readonly ListBox eventLog = new ListBox();
@@ -105,7 +108,9 @@ internal sealed class DesktopDashboard : Form
     {
         TableLayoutPanel host = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, BackColor = Chassis, Padding = new Padding(0, 0, 0, 0) };
         host.RowStyles.Add(new RowStyle(SizeType.Absolute, 34)); host.RowStyles.Add(new RowStyle(SizeType.Absolute, 25)); host.RowStyles.Add(new RowStyle(SizeType.Absolute, 25)); host.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        Button clear = NewButton("CLR LAST"); clear.Click += delegate { if (events.Count > 0) { events.RemoveAt(events.Count - 1); RefreshLog(); } }; host.Controls.Add(clear, 0, 0);
+        FlowLayoutPanel controls = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, Margin = new Padding(0) };
+        Button clear = NewButton("CLR LAST"); clear.Click += delegate { if (events.Count > 0) { events.RemoveAt(events.Count - 1); RefreshLog(); } }; controls.Controls.Add(clear);
+        Button export = NewButton("EXPORT TXT"); export.AutoSize = true; export.Click += delegate { ExportEvents(); }; controls.Controls.Add(export); host.Controls.Add(controls, 0, 0);
         host.Controls.Add(NewSection("CRITICAL ADVISORY LOG"), 0, 1); logCount.Text = "00 EVENTS"; logCount.ForeColor = Green; logCount.Font = new Font("Consolas", 8); logCount.Dock = DockStyle.Fill; logCount.TextAlign = ContentAlignment.MiddleRight; host.Controls.Add(logCount, 0, 2);
         eventLog.BackColor = Color.FromArgb(4, 14, 8); eventLog.ForeColor = Green; eventLog.BorderStyle = BorderStyle.Fixed3D; eventLog.Font = new Font("Consolas", 8); eventLog.Dock = DockStyle.Fill; eventLog.HorizontalScrollbar = true; host.Controls.Add(eventLog, 0, 3); return host;
     }
@@ -237,6 +242,26 @@ internal sealed class DesktopDashboard : Form
 
     private static string CardFor(string title) { if (title.Contains("ITT")) return "itt"; if (title.Contains("TORQUE")) return "torque"; if (title.Contains("PROP")) return "propRpm"; if (title.Contains("NG")) return "ng"; if (title.Contains("OIL PRESSURE")) return "oilPressure"; if (title.Contains("OIL TEMP")) return "oilTemperature"; return ""; }
     private void RefreshLog() { eventLog.BeginUpdate(); eventLog.Items.Clear(); for (int i = 0; i < events.Count; i++) eventLog.Items.Add(events[i]); eventLog.EndUpdate(); logCount.Text = events.Count.ToString("00") + " EVENTS"; if (eventLog.Items.Count > 0) eventLog.TopIndex = eventLog.Items.Count - 1; }
+    private void ExportEvents()
+    {
+        using (SaveFileDialog dialog = new SaveFileDialog())
+        {
+            dialog.Title = "Export Critical Advisory Log";
+            dialog.Filter = "Text files (*.txt)|*.txt";
+            dialog.DefaultExt = "txt";
+            dialog.AddExtension = true;
+            dialog.FileName = "KC-208-alert-log-" + sessionStarted.ToString("yyyy-MM-dd-HH-mm-ss") + ".txt";
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+            List<string> lines = new List<string>();
+            lines.Add("KABOCHA CRUISE 208 - CRITICAL ADVISORY LOG");
+            lines.Add("Session started: " + sessionStarted.ToString("yyyy-MM-dd HH:mm:ss"));
+            lines.Add("Exported: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            lines.Add("Events: " + events.Count);
+            lines.Add("");
+            lines.AddRange(events);
+            File.WriteAllLines(dialog.FileName, lines.ToArray(), new UTF8Encoding(true));
+        }
+    }
     private void SetCard(string key, double value, string format, string sub, double percent) { if (cards.ContainsKey(key)) cards[key].SetValue(value.ToString(format), sub, percent); }
     private void SetBrightness(int value) { double f = value / 100.0; Color lit = Color.FromArgb((int)(80 + 159 * f), (int)(35 + 49 * f), (int)(20 + 27 * f)); foreach (InstrumentCard c in cards.Values) c.SetDisplayColor(lit); tail.ForeColor = Color.FromArgb((int)(70 + 73 * f), (int)(100 + 107 * f), (int)(55 + 63 * f)); }
     private void ResetCycle() { startCycle = startComplete = false; preLatch.Clear(); preLatchValue.Clear(); oilBaseline = -1; oilBaselineBegan = null; oilPeak = 0; shutdownBegan = null; cruise = false; cruiseCandidate = cruiseExit = null; }

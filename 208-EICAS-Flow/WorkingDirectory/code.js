@@ -94,6 +94,7 @@ let starterBegan=null,itt1090Began=null,propOverspeedBegan=null,propTransientBeg
 let cruiseCandidateBegan=null,cruiseExitBegan=null,cruiseActive=false;
 let oilBaseline=null,oilBaselineBegan=null,oilBaselinePeak=0;
 let limitEvents=[],activeLimitEvents={},dismissedLimitEvents={};
+const sessionStarted=new Date();
 var firstRunNotice=$('firstRunNotice'); if(firstRunNotice){firstRunNotice.hidden=true;}
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const hdg=v=>String(Math.round(((Number(v)%360)+360)%360)).padStart(3,'0')+'Â°';
@@ -180,7 +181,7 @@ function recordSessionEvent(key,severity,title,detail,active){
   const now=new Date(),existing=activeLimitEvents[key];
   if(existing){existing.severity=severity;existing.title=title;existing.detail=detail;renderLimitEvents();return}
   const event={key,severity,title,detail,started:now,active:active!==false,cleared:active===false?now:null};
-  limitEvents.unshift(event);if(limitEvents.length>20)limitEvents.length=20;
+  limitEvents.unshift(event);
   if(event.active)activeLimitEvents[key]=event;renderLimitEvents();
 }
 function updateLimitEvents(alerts){
@@ -198,17 +199,24 @@ function clearLastLimitEvent(){
   renderLimitEvents();
 }
 function exportLimitEvents(){
-  const lines=['208 EICAS Critical Advisory Log','Exported '+new Date().toLocaleString(),''];
-  if(!limitEvents.length)lines.push('NO RECORDED LIMIT EVENTS');
-  else [...limitEvents].reverse().forEach(e=>{
-    const status=e.active?'ACTIVE':'CLEARED '+eventTime(e.cleared);
-    lines.push(eventTime(e.started)+'  '+(e.severity==='critical'?'LIMIT':'WARN')+'  '+e.title+'  '+e.detail+'  '+status);
+  const stamp=date=>{
+    const pad=value=>String(value).padStart(2,'0');
+    return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+' '+pad(date.getHours())+':'+pad(date.getMinutes())+':'+pad(date.getSeconds());
+  };
+  const lines=['KABOCHA CRUISE 208 - CRITICAL ADVISORY LOG','Session started: '+stamp(sessionStarted),'Exported: '+stamp(new Date()),'Events: '+limitEvents.length,''];
+  limitEvents.slice().reverse().forEach((event,index)=>{
+    lines.push('EVENT '+String(index+1).padStart(2,'0'));
+    lines.push('Started: '+stamp(event.started));
+    lines.push('Severity: '+(event.severity==='critical'?'LIMIT':'WARN'));
+    lines.push('Alert: '+event.title);
+    lines.push('Detail: '+event.detail);
+    lines.push('Status: '+(event.active?'ACTIVE':'CLEARED '+stamp(event.cleared)));
+    lines.push('');
   });
-  const blob=new Blob([lines.join('\r\n')],{type:'text/plain'});
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='208-EICAS-log-'+new Date().toISOString().replace(/[:.]/g,'-')+'.txt';
-  document.body.appendChild(a);a.click();a.remove();
-  URL.revokeObjectURL(url);
+  const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='KC-208-alert-log-'+stamp(sessionStarted).replace(/[: ]/g,'-')+'.txt';
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),0);
 }
 
 function setCard(name,level,sub,pct,greenEnd,amberEnd){
@@ -611,7 +619,7 @@ displayDimmer.addEventListener('keydown',event=>{
   if(event.key==='End'){event.preventDefault();setDisplayBrightness(100)}
 });
 $('clearLastEvent').addEventListener('click',clearLastLimitEvent);
-$('exportLog').addEventListener('click',exportLimitEvents);
+$('exportEvents').addEventListener('click',exportLimitEvents);
 const powerButton=$('powerButton');
 if(powerButton){
   powerButton.title='Close 208 EICAS';

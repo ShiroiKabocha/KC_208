@@ -1,4 +1,4 @@
-208 EICAS v1.1
+208 EICAS v1.1.0
 
 
 Thank you for downloading the Kabocha 208 EICAS system, manufactured by Kabocha Industries-your leader in anachronistic simulator add-ons.
@@ -16,7 +16,7 @@ REQUIREMENTS
 
 INSTALLATION
 ------------
-1. Extract the entire 208-EICAS-v1.1 folder somewhere convenient.
+1. Extract the entire 208-EICAS-v1.1.0 folder somewhere convenient.
 2. Do not place it in the MSFS Community folder. This is an external application.
 3. Keep 208 EICAS.exe and SimConnect.dll together in the same folder.
 4. Start MSFS and load the Black Square Caravan Professional.
@@ -66,7 +66,8 @@ aircraft and does not replace the full pre-flight checklists. Always follow the 
 manual and in-simulator checklists.
 
 The limit-event log exists only for the current application session. Closing or refreshing the browser window clears it.
-You can also press the 'CLR Last' button to remove the last event log captured, or press 'SAVE LOG' to download every recorded event as a .txt file before it is lost.
+You can also press the 'CLR Last' button to remove the last event log captured.
+Press 'EXPORT TXT' to save every retained event from the current session as a timestamped text file.
 
 TROUBLESHOOTING
 ---------------
