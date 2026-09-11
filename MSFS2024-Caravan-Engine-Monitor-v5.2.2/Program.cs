@@ -728,7 +728,7 @@ h1{
 .rack-section:before{left:7px}.rack-section:after{right:7px}
 .rack-section .section-title{margin:0 15px 9px;padding:1px 0 7px;border-bottom:1px solid #343a3f;text-align:center;color:#c4c2b8}
 .navigation-rack{padding-top:20px}
-.event-log-stack{min-width:0;margin-top:7px}.event-log-controls{height:31px;padding-left:3px}
+.event-log-stack{min-width:0;margin-top:7px}.event-log-controls{height:31px;padding-left:3px;display:flex;gap:7px}
 .clr-last{position:relative;min-width:69px;height:27px;padding:0 9px;border:1px solid #030404;border-radius:2px;background:linear-gradient(180deg,#4b4e50 0,#292c2e 42%,#17191b 55%,#25282a 100%);box-shadow:0 0 0 1px #55595a,inset 0 1px rgba(255,255,255,.13),inset 0 -2px 3px #080909,2px 3px 4px #000;color:#e1ddcc;font:700 9px ""Arial Narrow"",""Segoe UI"",sans-serif;letter-spacing:.12em;text-shadow:1px 1px #000;cursor:pointer}
 .clr-last:before{content:"""";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.07);border-radius:1px;pointer-events:none}.clr-last:hover{color:#f3efdc;background:linear-gradient(180deg,#565a5c,#303437 42%,#1b1e20 55%,#2a2e30)}.clr-last:active{transform:translate(1px,2px);box-shadow:0 0 0 1px #414546,inset 1px 2px 5px #050606}.clr-last:focus-visible{outline:1px solid #9bc783;outline-offset:2px}
 .event-log{min-width:0;margin-top:0;padding:10px;background:#0b0e10;border:2px solid #050607;box-shadow:inset 0 0 0 1px #3b4248,inset 0 0 22px #000,1px 1px 0 #4d5255}
@@ -1018,7 +1018,7 @@ h1{
 </div>
 </div>
 <div class=""event-log-stack"">
-<div class=""event-log-controls""><button id=""clearLastEvent"" class=""clr-last"" type=""button"">CLR LAST</button></div>
+<div class=""event-log-controls""><button id=""clearLastEvent"" class=""clr-last"" type=""button"">CLR LAST</button><button id=""exportLog"" class=""clr-last"" type=""button"">SAVE LOG</button></div>
 <aside class=""event-log"">
   <div class=""event-log-title"">Critical Advisory Log</div>
   <div class=""log-screen""><div class=""log-status""><span>SESSION</span><span id=""logCount"">00 EVENTS</span></div><div id=""logEvents""><div class=""log-empty"">NO RECORDED LIMIT EVENTS</div></div></div>
@@ -1137,6 +1137,19 @@ function clearLastLimitEvent(){
   const removed=limitEvents.shift();
   if(removed.active){dismissedLimitEvents[removed.key]=true;delete activeLimitEvents[removed.key]}
   renderLimitEvents();
+}
+function exportLimitEvents(){
+  const lines=['208 EICAS Critical Advisory Log','Exported '+new Date().toLocaleString(),''];
+  if(!limitEvents.length)lines.push('NO RECORDED LIMIT EVENTS');
+  else [...limitEvents].reverse().forEach(e=>{
+    const status=e.active?'ACTIVE':'CLEARED '+eventTime(e.cleared);
+    lines.push(eventTime(e.started)+'  '+(e.severity==='critical'?'LIMIT':'WARN')+'  '+e.title+'  '+e.detail+'  '+status);
+  });
+  const blob=new Blob([lines.join('\r\n')],{type:'text/plain'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='208-EICAS-log-'+new Date().toISOString().replace(/[:.]/g,'-')+'.txt';
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
 }
 
 function setCard(name,level,sub,pct,greenEnd,amberEnd){
@@ -1537,6 +1550,7 @@ displayDimmer.addEventListener('keydown',event=>{
   if(event.key==='End'){event.preventDefault();setDisplayBrightness(100)}
 });
 $('clearLastEvent').addEventListener('click',clearLastLimitEvent);
+$('exportLog').addEventListener('click',exportLimitEvents);
 const powerButton=$('powerButton');let powerHoldTimer=null;
 function cancelPowerHold(){if(powerHoldTimer){clearTimeout(powerHoldTimer);powerHoldTimer=null}powerButton.classList.remove('holding')}
 function beginPowerHold(event){
