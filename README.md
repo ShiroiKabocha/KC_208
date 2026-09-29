@@ -10,11 +10,6 @@ Download the current Windows ZIP from the repository's Releases page. Extract th
 
 Keep `SimConnect.dll` beside the executable. This is an external application and does not belong in the Community folder.
 
-## Repository layout
-
-- `MSFS2024-Caravan-Engine-Monitor-v5.2.2/` — application source, atmospheric preview, assets, and packaging scripts
-- `208-EICAS-Flow/` — self-contained Parallel 42 Flow widget source and working files
-- `NOTEBOOK-CONTENT.md` inside the source project — editable pop-out notebook content
 
 ## Requirements
 
